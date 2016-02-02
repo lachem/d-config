@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<ConfigShould>
+    <Undisclosed>
+        <Name>Undisclosed1</Name>
+    </Undisclosed>
+    <System>
+        <SessionStatus>Enabled</SessionStatus>
+        <SessionStatus3>Enabled</SessionStatus>
+    </System>
+    <Quiz>Whatsoever</Quiz>
+    <Quiz2>
+        <Nested>NestedValue</Nested>
+    </Quiz2>
+    <Zip>
+        <Nested>NestedValue2</Nested>
+    </Zip>
+</ConfigShould>

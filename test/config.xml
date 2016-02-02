@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<ConfigShould>
+    <System>
+        <DataPath>%env.RUNTIME%/data</DataPath>
+        <FixConfig>%env.SOURCE%/data</FixConfig>
+        <SessionFile>filename</SessionFile>
+        <SessionId>STH</SessionId>
+        <SessionInstance>20</SessionInstance>
+        <SessionUniqueId>%config.ConfigShould.System.SessionId%-%config.ConfigShould.System.SessionInstance%</SessionUniqueId>
+        <SessionUniqueId2>%config.ConfigShould.System.SessionUniqueId%-2</SessionUniqueId2>
+        <SessionStatus>Disabled</SessionStatus>
+        <SessionStatus2>%config.ConfigShould.System.SessionStatus%</SessionStatus2>
+    </System>
+    <Repeated>
+        <Rep>Value1</Rep>
+        <Rep>Value2</Rep>
+        <Rep>Value3</Rep>
+    </Repeated>
+    <Repeated>
+        <Rep>Value4</Rep>
+        <Rep>Value5</Rep>
+        <Rep>Value6</Rep>
+    </Repeated>
+</ConfigShould>

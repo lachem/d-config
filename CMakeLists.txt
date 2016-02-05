@@ -50,6 +50,14 @@ elseif (CMAKE_BUILD_TYPE MATCHES Debug)
 endif()
 add_definitions(-DHOOLA_CACHE_LINE_SIZE=${HOOLA_CACHE_LINE_SIZE})
 
+######################
+# Additional targets #
+######################
+
+add_custom_target(distclean
+    rm -rf bin lib CMakeCache.txt CMakeFiles cmake_install.cmake Makefile 
+)
+
 ###############
 # Rock & Roll #
 ###############

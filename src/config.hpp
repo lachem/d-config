@@ -8,7 +8,6 @@
 //std
 #include <map>
 #include <memory>
-#include <../toolchain/boost/1.55/Linux-x86_64-gcc4.8/include/boost/asio/async_result.hpp>
 
 //boost
 #include <boost/property_tree/ptree.hpp>

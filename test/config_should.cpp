@@ -5,10 +5,9 @@
 
 //test tools
 #include <gmock/gmock.h>
-#include <test/test_config.hpp>
 
 //config
-#include <config/config.hpp>
+#include <config.hpp>
 
 using testing::Test;
 using testing::_;
@@ -22,13 +21,20 @@ struct ConfigShould : public Test
 {
     void loadConfig() 
     {
-        config = std::make_shared<::config::Config>(TestConfig::config->used());
+        std::vector<std::string> files;
+        files.push_back("test/config.xml");
+        files.push_back("test/config_override.xml");
+        config.reset(new ::config::Config(files));
     }
+
     void loadConfig(const ::config::Config::separator_type& separator) 
     {
-        config = std::make_shared<::config::Config>(TestConfig::config->used(),separator);
+        std::vector<std::string> files;
+        files.push_back("test/config.xml");
+        files.push_back("test/config_override.xml");
+        config.reset(new ::config::Config(files, separator));
     }
-    
+
     std::shared_ptr<::config::Config> config;
 };
 

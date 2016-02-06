@@ -24,7 +24,7 @@ InitFactory::InitFactory(int anArgc, char** anArgv, const separator_type& aSepar
 
 Config InitFactory::create() const
 {
-    return FileFactory(readFiles(), separator).create();
+    return FileFactory(std::move(readFiles()), separator).create();
 }
 
 std::vector<std::string> InitFactory::readFiles() const

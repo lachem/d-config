@@ -12,12 +12,6 @@
 namespace dconfig 
 {
 
-FileFactory::FileFactory(const std::vector<std::string>& aFileList, const separator_type& aSeparator)
-    : files(aFileList)
-    , separator(aSeparator)
-{        
-}
-
 std::vector<std::string> FileFactory::readFiles(const std::vector<std::string>& files) const
 {
     std::vector<std::string> contents;

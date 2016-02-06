@@ -19,7 +19,12 @@ struct FileFactory
 {
     typedef Config::separator_type separator_type;
 
-    FileFactory(const std::vector<std::string>& aFileList, const separator_type& aSeparator = separator_type());
+    template<typename T>
+    FileFactory(T&& aFileList, const separator_type& aSeparator)
+        : files(aFileList)
+        , separator(aSeparator)
+    {        
+    }
 
     Config create() const
     {

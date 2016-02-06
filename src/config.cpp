@@ -164,22 +164,18 @@ void ConfigRoot::expandConfigParameters(
    
 } //namespace detail
 
-std::vector<std::string> Config::readFiles(const std::vector<Config::File>& files) const
+std::vector<std::string> FileFactory::readFiles(const std::vector<std::string>& files) const
 {
     std::vector<std::string> contents;
     for(auto&& filename : files)
     {
-        contents.push_back(readConfigFile(filename));
+        std::ifstream fileStream(filename);
+        contents.push_back(std::string(
+            std::istreambuf_iterator<char>(fileStream),
+            std::istreambuf_iterator<char>())
+        );
     }
     return std::move(contents);
-}
-
-std::string Config::readConfigFile(const Config::File& filename) const
-{
-    std::ifstream configFile(static_cast<std::string>(filename));
-    return std::string(
-        std::istreambuf_iterator<char>(configFile),
-        std::istreambuf_iterator<char>());
 }
 
 std::vector<std::string> configFiles(int argc, char** argv)
@@ -219,7 +215,7 @@ std::vector<std::string> configFiles(int argc, char** argv)
     
 Config init(int argc, char** argv)
 {
-    return dconfig::Config(configFiles(argc,argv));
+    return FileFactory(configFiles(argc,argv)).create();
 }
 
 } //namespace dconfig

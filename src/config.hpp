@@ -69,18 +69,10 @@ private:
 
 struct Config
 {        
-    BOOST_STRONG_TYPEDEF(std::string, File)
     
     typedef detail::ConfigRoot::Separator separator_type;
     typedef detail::ConfigRoot::tree_type tree_type;
-    
-    Config(const std::vector<File>& aFileList, const separator_type& aSeparator = separator_type())
-        : root(new detail::ConfigRoot(readFiles(aFileList),aSeparator))
-        , tree(root->getTree())
-        , separator(aSeparator)
-    {        
-    }
-    
+        
     Config(const std::vector<std::string>& aFileList, const separator_type& aSeparator = separator_type())
         : root(new detail::ConfigRoot(aFileList,aSeparator))
         , tree(root->getTree())
@@ -152,7 +144,7 @@ struct Config
     
     explicit operator bool() const noexcept
     { 
-        return tree;
+        return tree.is_initialized();
     }
     
 private:
@@ -163,10 +155,7 @@ private:
         , tree(aSubtree)
         , separator(aSeparator)
     {}
-    
-    std::vector<std::string> readFiles(const std::vector<File>& files) const;
-    std::string readConfigFile(const File& filename) const;
-    
+   
     boost::optional<const tree_type&> getSubtree(const std::string& path) const
     {
         if(tree)
@@ -195,6 +184,29 @@ private:
     separator_type separator;
 };
 
+struct FileFactory
+{
+    typedef Config::separator_type separator_type;
+
+    FileFactory(const std::vector<std::string>& aFileList, const separator_type& aSeparator = separator_type())
+        : files(aFileList)
+        , separator(aSeparator)
+    {        
+    }
+
+    Config create()
+    {
+        return Config(readFiles(files), separator);
+    }
+
+private:
+    std::vector<std::string> readFiles(const std::vector<std::string>& files) const;
+
+    std::vector<std::string> files;
+    Config::separator_type separator;
+};
+
 Config init(int argc, char** argv);
 
 } //namespace dconfig
+

@@ -47,10 +47,11 @@ struct FileConfigLoader
     void loadConfig(const ::dconfig::Config::separator_type& separator = 
             ::dconfig::Config::separator_type()) 
     {
-        std::vector<::dconfig::Config::File> files;
-        files.push_back(::dconfig::Config::File("test/config.xml"));
-        files.push_back(::dconfig::Config::File("test/config_override.xml"));
-        config.reset(new ::dconfig::Config(files, separator));
+        std::vector<std::string> files;
+        files.push_back("test/config.xml");
+        files.push_back("test/config_override.xml");
+        config.reset(new ::dconfig::Config(
+                ::dconfig::FileFactory(files, separator).create()));
     }
 
     std::shared_ptr<::dconfig::Config> config;
@@ -63,6 +64,12 @@ struct ConfigShould : public Test, public T
 
 typedef ::testing::Types<FileConfigLoader, TextConfigLoader> TestTypes;
 TYPED_TEST_CASE(ConfigShould, TestTypes);
+
+TYPED_TEST(ConfigShould, inidicateInitializedState)
+{
+    this->loadConfig();
+    EXPECT_TRUE(*(this->config) ? true : false);
+}
 
 TYPED_TEST(ConfigShould, returnSingleParameters)
 {

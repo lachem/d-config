@@ -5,9 +5,11 @@
 
 //local
 #include "config.hpp"
+#include <cassert>
 
 //boost
 #include <boost/program_options.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 
 namespace po = boost::program_options;
 
@@ -49,25 +51,17 @@ struct ConfigVarExpander
     const boost::property_tree::ptree* ptree;
 };
     
-void ConfigRoot::parse()
+void ConfigRoot::parse(const std::vector<std::string>& contents)
 {
-    for(auto&& filename : files)
+    for(auto&& config : contents)
     {
-        auto mergeFrom = buildPropertyTree(expandEnvParameters(readConfigFile(filename)));
+        auto mergeFrom = buildPropertyTree(expandEnvParameters(config));
         mergePropertyTree(ptree,mergeFrom);
     }
-    if(!files.empty())
+    if(!contents.empty())
     {
         expandConfigParameters(ptree);
     }
-}
-
-std::string ConfigRoot::readConfigFile(const std::string& filename)
-{
-    std::ifstream configFile(filename);
-    return std::string(
-        std::istreambuf_iterator<char>(configFile),
-        std::istreambuf_iterator<char>());
 }
 
 std::string ConfigRoot::expandEnvParameters(const std::string& contents)
@@ -169,6 +163,24 @@ void ConfigRoot::expandConfigParameters(
 }
    
 } //namespace detail
+
+std::vector<std::string> Config::readFiles(const std::vector<Config::File>& files) const
+{
+    std::vector<std::string> contents;
+    for(auto&& filename : files)
+    {
+        contents.push_back(readConfigFile(filename));
+    }
+    return std::move(contents);
+}
+
+std::string Config::readConfigFile(const Config::File& filename) const
+{
+    std::ifstream configFile(static_cast<std::string>(filename));
+    return std::string(
+        std::istreambuf_iterator<char>(configFile),
+        std::istreambuf_iterator<char>());
+}
 
 std::vector<std::string> configFiles(int argc, char** argv)
 {

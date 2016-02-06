@@ -6,3 +6,6 @@ CMakeCache.txt
 cmake_install.cmake
 Makefile
 
+.kdev4/*
+dconfig.kdev4
+

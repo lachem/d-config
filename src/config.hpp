@@ -11,7 +11,6 @@
 
 //boost
 #include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/xpressive/xpressive.hpp>
 
@@ -35,23 +34,20 @@ struct ConfigRoot
    
     typedef boost::property_tree::ptree tree_type;
     
-    ConfigRoot(const std::vector<std::string>& aFileList, Separator aSeparator = Separator()) 
-        : files(aFileList)
-        , separator(aSeparator) 
+    ConfigRoot(const std::vector<std::string>& contents, Separator aSeparator = Separator()) 
+        : separator(aSeparator) 
     {
-        parse();
+        parse(contents);
     }
     
     ConfigRoot(ConfigRoot&&) = delete;
     ConfigRoot(const ConfigRoot&) = delete;
     bool operator=(const ConfigRoot&) = delete;
     
-    const tree_type& getTree() const { return ptree; }
-    const std::vector<std::string>& used() const { return files; }
+    const tree_type& getTree() const { return ptree; }    
  
 private: 
-    void parse();
-    std::string readConfigFile(const std::string& filename);
+    void parse(const std::vector<std::string>& contents);    
     std::string expandEnvParameters(const std::string& contents);
     boost::property_tree::ptree buildPropertyTree(const std::string& contents);
     
@@ -66,22 +62,31 @@ private:
       , const boost::xpressive::sregex& match);
    
     boost::property_tree::ptree ptree;
-    std::vector<std::string> files;
     Separator separator;
 };
 
 } //namespace detail
 
 struct Config
-{    
+{        
+    BOOST_STRONG_TYPEDEF(std::string, File)
+    
     typedef detail::ConfigRoot::Separator separator_type;
     typedef detail::ConfigRoot::tree_type tree_type;
+    
+    Config(const std::vector<File>& aFileList, const separator_type& aSeparator = separator_type())
+        : root(new detail::ConfigRoot(readFiles(aFileList),aSeparator))
+        , tree(root->getTree())
+        , separator(aSeparator)
+    {        
+    }
     
     Config(const std::vector<std::string>& aFileList, const separator_type& aSeparator = separator_type())
         : root(new detail::ConfigRoot(aFileList,aSeparator))
         , tree(root->getTree())
         , separator(aSeparator)
-    {}
+    {        
+    }
     
     template<typename T>
     boost::optional<T> get(const std::string& path) const
@@ -145,11 +150,6 @@ struct Config
         return std::move(result);
     }
     
-    const std::vector<std::string>& used() const 
-    { 
-        return root->used();        
-    }
-    
     explicit operator bool() const noexcept
     { 
         return tree;
@@ -163,6 +163,9 @@ private:
         , tree(aSubtree)
         , separator(aSeparator)
     {}
+    
+    std::vector<std::string> readFiles(const std::vector<File>& files) const;
+    std::string readConfigFile(const File& filename) const;
     
     boost::optional<const tree_type&> getSubtree(const std::string& path) const
     {

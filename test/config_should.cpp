@@ -8,6 +8,7 @@
 
 //config
 #include <config.hpp>
+#include <file_factory.hpp>
 
 //std
 #include <fstream>

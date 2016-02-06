@@ -184,29 +184,5 @@ private:
     separator_type separator;
 };
 
-struct FileFactory
-{
-    typedef Config::separator_type separator_type;
-
-    FileFactory(const std::vector<std::string>& aFileList, const separator_type& aSeparator = separator_type())
-        : files(aFileList)
-        , separator(aSeparator)
-    {        
-    }
-
-    Config create()
-    {
-        return Config(readFiles(files), separator);
-    }
-
-private:
-    std::vector<std::string> readFiles(const std::vector<std::string>& files) const;
-
-    std::vector<std::string> files;
-    Config::separator_type separator;
-};
-
-Config init(int argc, char** argv);
-
 } //namespace dconfig
 

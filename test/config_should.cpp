@@ -14,7 +14,7 @@ using testing::_;
 
 namespace test 
 {
-namespace config 
+namespace dconfig 
 {
     
 struct ConfigShould : public Test
@@ -24,18 +24,18 @@ struct ConfigShould : public Test
         std::vector<std::string> files;
         files.push_back("test/config.xml");
         files.push_back("test/config_override.xml");
-        config.reset(new ::config::Config(files));
+        config.reset(new ::dconfig::Config(files));
     }
 
-    void loadConfig(const ::config::Config::separator_type& separator) 
+    void loadConfig(const ::dconfig::Config::separator_type& separator) 
     {
         std::vector<std::string> files;
         files.push_back("test/config.xml");
         files.push_back("test/config_override.xml");
-        config.reset(new ::config::Config(files, separator));
+        config.reset(new ::dconfig::Config(files, separator));
     }
 
-    std::shared_ptr<::config::Config> config;
+    std::shared_ptr<::dconfig::Config> config;
 };
 
 TEST_F(ConfigShould, returnSingleParameters)
@@ -61,7 +61,7 @@ TEST_F(ConfigShould, expandEnvironmentVariables2)
 TEST_F(ConfigShould, allowSlashSeperator)
 {
     setenv("SOURCE","/source",1);
-    loadConfig(::config::Config::separator_type("/"));
+    loadConfig(::dconfig::Config::separator_type("/"));
     EXPECT_EQ(std::string("/source/data"), config->get<std::string>("ConfigShould/System/FixConfig"));
 }
 
@@ -139,5 +139,5 @@ TEST_F(ConfigShould, returnMultipleParameters)
     EXPECT_EQ(std::string("Value3"),values[2]);
 }
 
-} // namespace config
+} // namespace dconfig
 } // namespace test

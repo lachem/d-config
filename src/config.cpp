@@ -9,10 +9,10 @@
 //boost
 #include <boost/program_options.hpp>
 
-namespace config 
-{
-
 namespace po = boost::program_options;
+
+namespace dconfig 
+{
 
 namespace detail
 {
@@ -207,7 +207,7 @@ std::vector<std::string> configFiles(int argc, char** argv)
     
 Config init(int argc, char** argv)
 {
-    return config::Config(configFiles(argc,argv));
+    return dconfig::Config(configFiles(argc,argv));
 }
 
-} //namespace config
+} //namespace dconfig

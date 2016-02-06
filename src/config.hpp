@@ -15,7 +15,7 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/xpressive/xpressive.hpp>
 
-namespace config 
+namespace dconfig 
 {
 namespace detail
 {
@@ -194,4 +194,4 @@ private:
 
 Config init(int argc, char** argv);
 
-} //namespace config
+} //namespace dconfig

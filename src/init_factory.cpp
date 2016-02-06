@@ -4,7 +4,7 @@
 //          http://www.boost.org/LICENSE_1_0.txt)
 
 //local
-#include "init.hpp"
+#include "init_factory.hpp"
 #include "file_factory.hpp"
 
 //boost
@@ -15,7 +15,19 @@ namespace po = boost::program_options;
 namespace dconfig 
 {
 
-std::vector<std::string> configFiles(int argc, char** argv)
+InitFactory::InitFactory(int anArgc, char** anArgv, const separator_type& aSeparator)
+    : argc(anArgc)
+    , argv(anArgv)
+    , separator(aSeparator)
+{
+}
+
+Config InitFactory::create() const
+{
+    return FileFactory(readFiles(), separator).create();
+}
+
+std::vector<std::string> InitFactory::readFiles() const
 {
     po::options_description desc("Allowed options");
     desc.add_options()
@@ -36,24 +48,14 @@ std::vector<std::string> configFiles(int argc, char** argv)
     if (!vm["config"].empty()) 
     {
         cfgFiles = vm["config"].as<std::vector<std::string>>();
-        for(auto& file : cfgFiles)
-        {
-            std::cout << "Using config file " << file << std::endl;
-        }
     }
     else
     {
-        std::cout << desc << std::endl;
-        std::cout << "Config file not provided" << std::endl;
+        std::cerr << desc << std::endl;
     }
     
-    return cfgFiles;
+    return std::move(cfgFiles);
 }
     
-Config init(int argc, char** argv)
-{
-    return FileFactory(configFiles(argc,argv)).create();
-}
-
 } //namespace dconfig
 

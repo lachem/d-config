@@ -8,6 +8,7 @@
 
 //config
 #include <config.hpp>
+#include <init_factory.hpp>
 #include <file_factory.hpp>
 
 //std
@@ -21,6 +22,25 @@ namespace test
 namespace dconfig 
 {
 
+struct InitConfigLoader
+{   
+    void loadConfig(const ::dconfig::Config::separator_type& separator = 
+            ::dconfig::Config::separator_type()) 
+    {
+        int argc = 4; 
+        char* argv[4];
+        argv[0] = (char*)"program_name";
+        argv[1] = (char*)"--config";
+        argv[2] = (char*)"test/config.xml";
+        argv[3] = (char*)"test/config_override.xml";
+
+        config.reset(new ::dconfig::Config(
+                    ::dconfig::InitFactory(argc, argv, separator).create()));
+    }
+
+    std::shared_ptr<::dconfig::Config> config;
+};
+
 struct TextConfigLoader
 {   
     void loadConfig(const ::dconfig::Config::separator_type& separator = 
@@ -29,6 +49,7 @@ struct TextConfigLoader
         std::vector<std::string> files;
         files.push_back(loadFile("test/config.xml"));
         files.push_back(loadFile("test/config_override.xml"));
+
         config.reset(new ::dconfig::Config(files, separator));
     }
 
@@ -51,8 +72,9 @@ struct FileConfigLoader
         std::vector<std::string> files;
         files.push_back("test/config.xml");
         files.push_back("test/config_override.xml");
+        
         config.reset(new ::dconfig::Config(
-                ::dconfig::FileFactory(files, separator).create()));
+                    ::dconfig::FileFactory(files, separator).create()));
     }
 
     std::shared_ptr<::dconfig::Config> config;
@@ -63,7 +85,7 @@ struct ConfigShould : public Test, public T
 {
 };
 
-typedef ::testing::Types<FileConfigLoader, TextConfigLoader> TestTypes;
+typedef ::testing::Types<FileConfigLoader, TextConfigLoader, InitConfigLoader> TestTypes;
 TYPED_TEST_CASE(ConfigShould, TestTypes);
 
 TYPED_TEST(ConfigShould, inidicateInitializedState)
@@ -175,3 +197,4 @@ TYPED_TEST(ConfigShould, returnMultipleParameters)
 
 } // namespace dconfig
 } // namespace test
+

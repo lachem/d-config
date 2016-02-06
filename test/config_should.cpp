@@ -68,7 +68,7 @@ TYPED_TEST_CASE(ConfigShould, TestTypes);
 TYPED_TEST(ConfigShould, inidicateInitializedState)
 {
     this->loadConfig();
-    EXPECT_TRUE(*(this->config) ? true : false);
+    EXPECT_TRUE(static_cast<bool>(*(this->config)));
 }
 
 TYPED_TEST(ConfigShould, returnSingleParameters)

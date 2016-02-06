@@ -144,7 +144,7 @@ struct Config
     
     explicit operator bool() const noexcept
     { 
-        return tree.is_initialized();
+        return static_cast<bool>(tree);
     }
     
 private:

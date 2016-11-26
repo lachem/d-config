@@ -13,7 +13,6 @@ asssert(config.get<std::string>("Configuration.Component1.name") == scoped.get<s
 ```
 
 ## Table of Contents
-- [Teaser](#teaser)
 - [Requirements](#requirements)
 - [Building](#building)
 - [User Guide](#user-guide)

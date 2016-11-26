@@ -1,0 +1,11 @@
+{
+    "ConfigShould":
+    {        
+        "Array":
+        [
+            "Elem1",
+            "Elem2",
+            "Elem3"            
+        ]
+    }
+}

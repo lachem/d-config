@@ -21,34 +21,50 @@ namespace test
 {
 namespace dconfig 
 {
+    
+struct XmlExtension
+{
+    static const char* name() { return "xml"; }
+};
 
+struct JsonExtension
+{
+    static const char* name() { return "json"; }
+};
+
+template<typename Extension>
 struct InitConfigLoader
 {   
     void loadConfig(const ::dconfig::Config::separator_type& separator = 
             ::dconfig::Config::separator_type()) 
     {
-        int argc = 4; 
-        char* argv[4];
+        auto configFile         = std::string("test/config.") + Extension::name();
+        auto configFileOverride = std::string("test/config_override.") + Extension::name();
+        
+        int argc = 5; 
+        char* argv[5];
         argv[0] = (char*)"program_name";
         argv[1] = (char*)"--config";
-        argv[2] = (char*)"test/config.xml";
-        argv[3] = (char*)"test/config_override.xml";
+        argv[2] = (char*)configFile.c_str();
+        argv[3] = (char*)configFileOverride.c_str();
+        argv[4] = (char*)"test/array.json";
 
-        config.reset(new ::dconfig::Config(
-                    ::dconfig::InitFactory(argc, argv, separator).create()));
+        config.reset(new ::dconfig::Config(::dconfig::InitFactory(argc, argv, separator).create()));
     }
 
     std::shared_ptr<::dconfig::Config> config;
 };
 
+template<typename Extension>
 struct TextConfigLoader
 {   
     void loadConfig(const ::dconfig::Config::separator_type& separator = 
             ::dconfig::Config::separator_type()) 
     {
         std::vector<std::string> files;
-        files.push_back(loadFile("test/config.xml"));
-        files.push_back(loadFile("test/config_override.xml"));
+        files.push_back(loadFile(std::string("test/config.") + Extension::name()));
+        files.push_back(loadFile(std::string("test/config_override.") + Extension::name()));
+        files.push_back(loadFile(std::string("test/array.json")));
 
         config.reset(new ::dconfig::Config(files, separator));
     }
@@ -64,14 +80,16 @@ struct TextConfigLoader
     std::shared_ptr<::dconfig::Config> config;
 };
 
+template<typename Extension>
 struct FileConfigLoader
 {   
     void loadConfig(const ::dconfig::Config::separator_type& separator = 
             ::dconfig::Config::separator_type()) 
     {
         std::vector<std::string> files;
-        files.push_back("test/config.xml");
-        files.push_back("test/config_override.xml");
+        files.push_back(std::string("test/config.") + Extension::name());
+        files.push_back(std::string("test/config_override.") + Extension::name());
+        files.push_back(std::string("test/array.json"));
         
         config.reset(new ::dconfig::Config(
                     ::dconfig::FileFactory(files, separator).create()));
@@ -85,7 +103,9 @@ struct ConfigShould : public Test, public T
 {
 };
 
-typedef ::testing::Types<FileConfigLoader, TextConfigLoader, InitConfigLoader> TestTypes;
+typedef ::testing::Types<
+    FileConfigLoader<XmlExtension>,  TextConfigLoader<XmlExtension>,  InitConfigLoader<XmlExtension>,    
+    FileConfigLoader<JsonExtension>, TextConfigLoader<JsonExtension>, InitConfigLoader<JsonExtension>> TestTypes;
 TYPED_TEST_CASE(ConfigShould, TestTypes);
 
 TYPED_TEST(ConfigShould, inidicateInitializedState)
@@ -193,6 +213,20 @@ TYPED_TEST(ConfigShould, returnMultipleParameters)
     EXPECT_EQ(std::string("Value1"),values[0]);
     EXPECT_EQ(std::string("Value2"),values[1]);
     EXPECT_EQ(std::string("Value3"),values[2]);
+}
+
+TYPED_TEST(ConfigShould, supportArraysJsonArrays)
+{
+    this->loadConfig();
+    
+    auto scope = this->config->scope("ConfigShould");
+    auto&& values = scope.template getAll<std::string>("Array.");
+    
+    ASSERT_EQ(3, values.size());
+    
+    EXPECT_EQ(std::string("Elem1"),values[0]);
+    EXPECT_EQ(std::string("Elem2"),values[1]);
+    EXPECT_EQ(std::string("Elem3"),values[2]);
 }
 
 } // namespace dconfig

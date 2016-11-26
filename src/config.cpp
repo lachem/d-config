@@ -10,6 +10,9 @@
 #include <cassert>
 
 //boost
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
 namespace dconfig 
@@ -52,8 +55,10 @@ struct ConfigVarExpander
 void ConfigRoot::parse(const std::vector<std::string>& contents)
 {
     for(auto&& config : contents)
-    {
-        auto mergeFrom = buildPropertyTree(expandEnvParameters(config));
+    {        
+        auto&& expanded = expandEnvParameters(config);
+        boost::trim(expanded);
+        auto mergeFrom = buildPropertyTree(expanded);
         mergePropertyTree(ptree,mergeFrom);
     }
     if(!contents.empty())
@@ -67,7 +72,17 @@ std::string ConfigRoot::expandEnvParameters(const std::string& contents)
     using namespace boost::xpressive;
     
     sregex env = "%env." >> (s1 = -+_) >> "%";
-    return regex_replace(contents, env, EnvVarExpander());
+    return std::move(regex_replace(contents, env, EnvVarExpander()));
+}
+
+inline bool isXml(const std::string& contents)
+{
+    return contents[0] == '<';
+}
+
+inline bool isJson(const std::string& contents)
+{
+    return contents[0] == '{';
 }
 
 boost::property_tree::ptree ConfigRoot::buildPropertyTree(const std::string& contents)
@@ -75,7 +90,20 @@ boost::property_tree::ptree ConfigRoot::buildPropertyTree(const std::string& con
     std::stringstream contentStream;
     contentStream.str(contents);
     boost::property_tree::ptree ptree;
-    boost::property_tree::xml_parser::read_xml(contentStream,ptree);
+    if (isXml(contents))
+    {
+        boost::property_tree::xml_parser::read_xml(contentStream, ptree);
+    }
+    else
+    if (isJson(contents))
+    {
+        boost::property_tree::json_parser::read_json(contentStream, ptree);
+    }
+    else
+    {
+        // TODO: inform the user
+    }
+       
     return ptree;
 }
 
@@ -103,7 +131,7 @@ void ConfigRoot::mergePropertyTree(
         
         if(itMergeTo->first > itMergeFrom->first)
         {
-            mergeTo.add_child(itMergeFrom->first,itMergeFrom->second);
+            mergeTo.add_child(itMergeFrom->first, itMergeFrom->second);
             ++currMergeFrom;
             continue;
         }
@@ -127,7 +155,7 @@ void ConfigRoot::mergePropertyTree(
     for(;currMergeFrom != endMergeFrom; ++currMergeFrom)
     {
         auto itMergeFrom = mergeFrom.to_iterator(currMergeFrom);
-        mergeTo.add_child(itMergeFrom->first,itMergeFrom->second);
+        mergeTo.add_child(itMergeFrom->first, itMergeFrom->second);
     }
 }
 
@@ -136,7 +164,7 @@ void ConfigRoot::expandConfigParameters(boost::property_tree::ptree& ptree)
     using namespace boost::xpressive;
     
     sregex configParamMatch = "%config." >> (s1 = -+_) >> "%";
-    expandConfigParameters(ptree,ptree,configParamMatch);
+    expandConfigParameters(ptree, ptree, configParamMatch);
 }
 
 void ConfigRoot::expandConfigParameters(

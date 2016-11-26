@@ -1,6 +1,12 @@
 # d-config
 A library meant to ease config file reading
 
+## Table of Contents
+- [Teaser](#teaser)
+- [Requirements](#requirements)
+- [Building](#building)
+- [License](#license)
+
 ## Teaser
 ```cpp
 dconfig::Config config = dconfig::FileFactory({config_cmp1.json, config_cmp2.xml, overrides.json}).create();

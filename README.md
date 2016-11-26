@@ -5,7 +5,7 @@ A library meant to ease system configuration management supporting:
 * configuration overrides
 * configuration scoping
 * expanding environment variables
-* expanding internal value alisases
+* expanding internal value aliases
 ```cpp
 dconfig::Config config = dconfig::FileFactory({"config_cmp1.json", "config_cmp2.xml", "overrides.json"}).create();
 dconfig::Config scoped = config.scope("Configuration.Component1");
@@ -59,7 +59,7 @@ int main(int argc, const char* argv[])
 ** Note** | Entries of subsequent config files overwrite corresponding (same path) previous config file entries.
 
 ### Getting Values
-Config class provides two ways of accessisng values of a field ```Config::get<T>(path)``` and ```Config::getAll<T>(path)```. Template parameter allows Config to interpret the underlying value(s) as user selected types.
+Config class provides two ways of accessing values of a field ```Config::get<T>(path)``` and ```Config::getAll<T>(path)```. Template parameter allows Config to interpret the underlying value(s) as user selected types.
 
 In case of single element value:
 ```cpp
@@ -90,7 +90,7 @@ Instead of necessarily providing all the information fixed in the config it is p
 ```
 
 ### Value Aliasing
-In certain cases it is necessary to repeat same value inside the config in multiple places. To avoid duplication dconfig supports value aliasing. Any previous (in top down order) tag value can be mentioned in any subsequents tags using a special syntax ```%config.{dot.separted.path.to.node}%```
+In certain cases it is necessary to repeat same value inside the config in multiple places. To avoid duplication ```dconfig``` supports value aliasing. Any previous (in top down order) tag value can be mentioned in any subsequents tags using a special syntax ```%config.{dot.separted.path.to.node}%```
 ```json
 {
   "Config": 

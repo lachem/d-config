@@ -34,7 +34,7 @@ struct ConfigRoot
    
     typedef boost::property_tree::ptree tree_type;
     
-    ConfigRoot(const std::vector<std::string>& contents, Separator aSeparator = Separator()) 
+    explicit ConfigRoot(const std::vector<std::string>& contents, Separator aSeparator = Separator()) 
         : separator(aSeparator) 
     {
         parse(contents);
@@ -68,12 +68,11 @@ private:
 } //namespace detail
 
 struct Config
-{        
-    
+{    
     typedef detail::ConfigRoot::Separator separator_type;
     typedef detail::ConfigRoot::tree_type tree_type;
         
-    Config(const std::vector<std::string>& aFileList, const separator_type& aSeparator = separator_type())
+    explicit Config(const std::vector<std::string>& aFileList, const separator_type& aSeparator = separator_type())
         : root(new detail::ConfigRoot(aFileList,aSeparator))
         , tree(root->getTree())
         , separator(aSeparator)
@@ -113,7 +112,7 @@ struct Config
             }
             
         }
-        return std::move(result);        
+        return result;        
     }
     
     Config scope(const std::string& path) const 

@@ -1,0 +1,29 @@
+{
+    "ConfigShould":
+    {
+        "System":
+        {
+            "DataPath"         : "%env.RUNTIME%/data",
+            "FixConfig"        : "%env.SOURCE%/data",
+            "SessionFile"      : "filename",
+            "SessionId"        : "STH",
+            "SessionInstance"  : 20,
+            "SessionUniqueId"  : "%config.ConfigShould.System.SessionId%-%config.ConfigShould.System.SessionInstance%",
+            "SessionUniqueId2" : "%config.ConfigShould.System.SessionUniqueId%-2",
+            "SessionStatus"    : "Disabled",
+            "SessionStatus2"   : "%config.ConfigShould.System.SessionStatus%"
+        },        
+        "Repeated":
+        {
+            "Rep": "Value1",
+            "Rep": "Value2",
+            "Rep": "Value3"
+        },
+        "Repeated":
+        {
+            "Rep": "Value4",
+            "Rep": "Value5",
+            "Rep": "Value6"            
+        }
+    }
+}

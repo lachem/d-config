@@ -26,7 +26,7 @@ asssert(config.get<std::string>("Configuration.Component1.name") == scoped.get<s
 
 ## Requirements
 * Library requires boost and C++11
-* Tests require gtest in gmock
+* Testing requires gtest and gmock
 
 ## Building
 Make sure BOOST_ROOT environment variable points to boost library directory
@@ -36,7 +36,7 @@ Make sure BOOST_ROOT environment variable points to boost library directory
 
 ## User Guide
 ### Loading Configuration
-There are three supported ways of building a single Config object.
+There are three supported ways of building a single ```dconfig::Config``` object.
 
 From text: 
 ```cpp 
@@ -56,7 +56,7 @@ int main(int argc, const char* argv[])
   ...
 ```
 
-** Note** | Entries of subsequent config files overwrite corresponding (same path) previous config file entries.
+**Note** | Entries of subsequent config files overwrite corresponding previous config file entries.
 
 ### Getting Values
 Config class provides two ways of accessing values of a field ```Config::get<T>(path)``` and ```Config::getAll<T>(path)```. Template parameter allows Config to interpret the underlying value(s) as user selected types.
@@ -78,7 +78,7 @@ assert(config.get<std::string>("Configuration.Component1.name") == scoped.get<st
 **Note** | Scoping is a cheap operation as the scoped config points to the same internal representation as the original one
 
 ### Environment Access
-Instead of necessarily providing all the information fixed in the config it is possible to use environment variables that will be filled in by the Config class during the building phase. Env. variable syntax ```%env.{name of the variable}%```.
+Instead of necessarily providing all the information fixed in the config it is possible to use environment variables that will be filled in by the Config class during building phase. Environment variable syntax ```%env.{name of the variable}%```.
 ```json
 {
   "Config": 
@@ -104,10 +104,10 @@ In certain cases it is necessary to repeat same value inside the config in multi
   }
 }
 ```
-**Note** | This functionality is based on text replacement, therefore there are no limitations on the number of aliases in one expression 
+**Note** | This functionality is based on text replacement, thus there are no limitations on the number of aliases in one expression 
 
 ### Note About Arrays
-The api is the same for XML and JSON files with one exception, namely arrays. As there is no notion of an array in XML therefore the following syntax will work only for JSON files:
+The api is the same for XML and JSON files with one exception namely arrays. As there is no notion of an array in XML hence the following syntax will work only for JSON files:
 ```cpp
 std::vector<int32_t> = confg.getAll<int32_t>("Config.Array.");
 ```
@@ -120,7 +120,7 @@ Corresponding json file:
   }
 }
 ```
-**Note** | Using ```getAll<...>("Config.Element")``` is different from ```getAll<...>("Config.Element.")``` as the former refers to repeated Element tag and the latter to an array.
+**Note** | Using ```getAll<...>("Config.Element")``` is different from ```getAll<...>("Config.Element.")``` as the former refers to repeated Element tag and the latter to an array under Element tag.
 
 ## License
 Copyright Adam Lach 2015. Distributed under the Boost Software License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).

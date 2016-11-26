@@ -59,8 +59,36 @@ int main(int argc, const char* argv[])
 ```
 
 ### Getting Values
+Config class provides two ways of accessisng values of a field ```Config::get<T>(path)``` and ```Config::getAll<T>(path)```. Template parameter allows Config to interpret the underlying value(s) as user selected types.
+
+In case of single element value:
+```cpp
+boost::optional<int32_t> value = confg.get<int32_t>("dot.separated.path.to.element");
+```
+In case of multiple elements with the same name:
+```cpp
+std::vector<int32_t> = confg.getAll<int32_t>("dot.separated.path.to.repeated.element");
+```
 ### Config Scoping
+Config scoping is a feature that allows to create a view (not an actual copy) of a config subset. All paths in the scoped config become relative to the scope. This functionality has been introduced to support configurations for reusable components.
+```cpp
+dconfig::Config scoped = config.scope("Configuration.Component1");
+asssert(config.get<std::string>("Configuration.Component1.name") == scoped.get<std::string>("name"));
+```
+**Note** | Scoping is a cheap operation as the scoped config points to the same internal representation as the original one
+
 ### Environment Access
+Instead of necessarily providing all the information fixed in the config it is possible to use environment variables that will be filled in by the Config class during the building phase. Env. variable syntax ```%env.{name of the variable}%```.
+```json
+{
+  "Confg": 
+  {
+    "User" : %env.USER%,
+    "Path" : %env.PWD%
+  }
+}
+```
+
 ### Value Aliasing
 ### Note About Arrays
 

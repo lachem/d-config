@@ -6,6 +6,11 @@ A library meant to ease system configuration management supporting:
 * configuration scoping
 * expanding environment variables
 * expanding internal value alisases
+```cpp
+dconfig::Config config = dconfig::FileFactory({"config_cmp1.json", "config_cmp2.xml", "overrides.json"}).create();
+dconfig::Config scoped = config.scope("Configuration.Component1");
+asssert(config.get<std::string>("Configuration.Component1.name") == scoped.get<std::string>("name"));
+```
 
 ## Table of Contents
 - [Teaser](#teaser)
@@ -19,13 +24,6 @@ A library meant to ease system configuration management supporting:
   - [Value Aliasing](#value-aliasing)
   - [Note About Arrays](#note-about-arrays)
 - [License](#license)
-
-## Teaser
-```cpp
-dconfig::Config config = dconfig::FileFactory({"config_cmp1.json", "config_cmp2.xml", "overrides.json"}).create();
-dconfig::Config scoped = config.scope("Configuration.Component1");
-asssert(config.get<std::string>("Configuration.Component1.name") == scoped.get<std::string>("name"));
-```
 
 ## Requirements
 * Library requires boost and C++11

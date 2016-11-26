@@ -11,13 +11,13 @@ A library meant to ease system configuration management supporting:
 - [Teaser](#teaser)
 - [Requirements](#requirements)
 - [Building](#building)
-- [User Guide](#user_guide)
-  - [Loading Configuration](#loading_configuration)
-  - [Getting Values](#getting_values)
-  - [Config Scoping](#config_scoping)  
-  - [Environment Access](#environment_access)
-  - [Value Aliasing](#value_aliasing)
-  - [Note About Arrays](#note_about_arrays)
+- [User Guide](#user-guide)
+  - [Loading Configuration](#loading-configuration)
+  - [Getting Values](#getting-values)
+  - [Config Scoping](#config-scoping)  
+  - [Environment Access](#environment-access)
+  - [Value Aliasing](#value-aliasing)
+  - [Note About Arrays](#note-about-arrays)
 - [License](#license)
 
 ## Teaser
@@ -39,10 +39,29 @@ Make sure BOOST_ROOT environment variable points to boost library directory
 
 ## User Guide
 ### Loading Configuration
+There are three supported ways of building a single Config object:
+- From text: 
+```cpp 
+dconfig::Config config({file1Contets, file2Contents}); 
+```
+- From files: 
+```cpp
+dconfig::Config config = dconfig::FileFactory({"pathToFile1.json"...}).create(); 
+```
+- From main params: 
+```cpp 
+${prog_name} --config pathToFile1.json pathToFile2.json pathToFile3.xml
+
+int main(int argc, const char* argv[]) 
+{
+  dconfig::Config config = dconfig::InitFactory(argc, argv).create(); 
+  ...
+```
+
 ### Getting Values
 ### Config Scoping
 ### Environment Access
-### Value Aliasing)
+### Value Aliasing
 ### Note About Arrays
 
 ## License

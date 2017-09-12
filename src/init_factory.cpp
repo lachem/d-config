@@ -10,9 +10,12 @@
 //boost
 #include <boost/program_options.hpp>
 
+//std
+#include <iostream>
+
 namespace po = boost::program_options;
 
-namespace dconfig 
+namespace dconfig
 {
 
 InitFactory::InitFactory(int anArgc, char** anArgv, const separator_type& aSeparator)
@@ -33,19 +36,19 @@ std::vector<std::string> InitFactory::readFiles() const
     desc.add_options()
         ("help", "produce help message")
         ("config,c", po::value<std::vector<std::string>>()->multitoken(), "configuration files");
-          
+
     po::variables_map vm;
     auto parsedOptions = po::command_line_parser(argc, argv).options(desc).allow_unregistered().run();
     po::store(parsedOptions, vm);
-    po::notify(vm);    
-    
+    po::notify(vm);
+
     std::vector<std::string> cfgFiles;
-    if (vm.count("help")) 
+    if (vm.count("help"))
     {
         std::cout << desc << std::endl;
     }
     else
-    if (!vm["config"].empty()) 
+    if (!vm["config"].empty())
     {
         cfgFiles = vm["config"].as<std::vector<std::string>>();
     }
@@ -53,9 +56,9 @@ std::vector<std::string> InitFactory::readFiles() const
     {
         std::cerr << desc << std::endl;
     }
-    
+
     return std::move(cfgFiles);
 }
-    
+
 } //namespace dconfig
 

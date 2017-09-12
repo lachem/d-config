@@ -9,7 +9,7 @@
 #include "config.hpp"
 #include "file_factory.hpp"
 
-namespace dconfig 
+namespace dconfig
 {
 
 struct InitFactory

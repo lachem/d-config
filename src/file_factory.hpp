@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-namespace dconfig 
+namespace dconfig
 {
 
 struct FileFactory
@@ -23,7 +23,7 @@ struct FileFactory
     explicit FileFactory(T&& aFileList, const separator_type& aSeparator = separator_type())
         : files(aFileList)
         , separator(aSeparator)
-    {        
+    {
     }
 
     Config create() const

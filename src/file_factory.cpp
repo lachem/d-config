@@ -9,7 +9,7 @@
 //std
 #include <fstream>
 
-namespace dconfig 
+namespace dconfig
 {
 
 std::vector<std::string> FileFactory::readFiles(const std::vector<std::string>& files) const

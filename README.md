@@ -67,7 +67,7 @@ boost::optional<int32_t> value = confg.get<int32_t>("dot.separated.path.to.eleme
 ```
 In case of multiple elements with the same name:
 ```cpp
-std::vector<int32_t> = confg.getAll<int32_t>("dot.separated.path.to.repeated.element");
+std::vector<int32_t> value = confg.getAll<int32_t>("dot.separated.path.to.repeated.element");
 ```
 ### Config Scoping
 Config scoping is a feature that allows to create a view (not an actual copy) of a config subset. All paths in the scoped config become relative to the scope. This functionality has been introduced to support configurations for reusable components.
@@ -109,7 +109,7 @@ In certain cases it is necessary to repeat same value inside the config in multi
 ### Note About Arrays
 The api is the same for XML and JSON files with one exception namely arrays. As there is no notion of an array in XML hence the following syntax will work only for JSON files:
 ```cpp
-std::vector<int32_t> = confg.getAll<int32_t>("Config.Array.");
+std::vector<int32_t> value = confg.getAll<int32_t>("Config.Array.");
 ```
 Corresponding json file:
 ```json

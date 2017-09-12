@@ -20,7 +20,7 @@ struct FileFactory
     typedef Config::separator_type separator_type;
 
     template<typename T>
-    FileFactory(T&& aFileList, const separator_type& aSeparator)
+    explicit FileFactory(T&& aFileList, const separator_type& aSeparator = separator_type())
         : files(aFileList)
         , separator(aSeparator)
     {        

@@ -17,11 +17,11 @@
 using testing::Test;
 using testing::_;
 
-namespace test 
+namespace test
 {
-namespace dconfig 
+namespace dconfig
 {
-    
+
 struct XmlExtension
 {
     static const char* name() { return "xml"; }
@@ -34,14 +34,14 @@ struct JsonExtension
 
 template<typename Extension>
 struct InitConfigLoader
-{   
-    void loadConfig(const ::dconfig::Config::separator_type& separator = 
-            ::dconfig::Config::separator_type()) 
+{
+    void loadConfig(const ::dconfig::Config::separator_type& separator =
+            ::dconfig::Config::separator_type())
     {
         auto configFile         = std::string("test/config.") + Extension::name();
         auto configFileOverride = std::string("test/config_override.") + Extension::name();
-        
-        int argc = 5; 
+
+        int argc = 5;
         char* argv[5];
         argv[0] = (char*)"program_name";
         argv[1] = (char*)"--config";
@@ -57,9 +57,9 @@ struct InitConfigLoader
 
 template<typename Extension>
 struct TextConfigLoader
-{   
-    void loadConfig(const ::dconfig::Config::separator_type& separator = 
-            ::dconfig::Config::separator_type()) 
+{
+    void loadConfig(const ::dconfig::Config::separator_type& separator =
+            ::dconfig::Config::separator_type())
     {
         std::vector<std::string> files;
         files.push_back(loadFile(std::string("test/config.") + Extension::name()));
@@ -76,21 +76,21 @@ struct TextConfigLoader
             std::istreambuf_iterator<char>(configFile),
             std::istreambuf_iterator<char>()));
     }
-    
+
     std::shared_ptr<::dconfig::Config> config;
 };
 
 template<typename Extension>
 struct FileConfigLoader
-{   
-    void loadConfig(const ::dconfig::Config::separator_type& separator = 
-            ::dconfig::Config::separator_type()) 
+{
+    void loadConfig(const ::dconfig::Config::separator_type& separator =
+            ::dconfig::Config::separator_type())
     {
         std::vector<std::string> files;
         files.push_back(std::string("test/config.") + Extension::name());
         files.push_back(std::string("test/config_override.") + Extension::name());
         files.push_back(std::string("test/array.json"));
-        
+
         config.reset(new ::dconfig::Config(
                     ::dconfig::FileFactory(files, separator).create()));
     }
@@ -104,7 +104,7 @@ struct ConfigShould : public Test, public T
 };
 
 typedef ::testing::Types<
-    FileConfigLoader<XmlExtension>,  TextConfigLoader<XmlExtension>,  InitConfigLoader<XmlExtension>,    
+    FileConfigLoader<XmlExtension>,  TextConfigLoader<XmlExtension>,  InitConfigLoader<XmlExtension>,
     FileConfigLoader<JsonExtension>, TextConfigLoader<JsonExtension>, InitConfigLoader<JsonExtension>> TestTypes;
 TYPED_TEST_CASE(ConfigShould, TestTypes);
 
@@ -184,7 +184,7 @@ TYPED_TEST(ConfigShould, supportScoping)
 TYPED_TEST(ConfigShould, supportMultiScoping)
 {
     this->loadConfig();
-    auto configScope = this->config->scope("ConfigShould").scope("System");    
+    auto configScope = this->config->scope("ConfigShould").scope("System");
     EXPECT_EQ(std::string("Enabled"), configScope.template get<std::string>("SessionStatus2"));
 }
 
@@ -193,7 +193,7 @@ TYPED_TEST(ConfigShould, supportMultipleScopes)
     this->loadConfig();
     auto configScopes = this->config->scope("ConfigShould").scopes("Repeated");
     ASSERT_EQ(2,configScopes.size());
-    EXPECT_TRUE(configScopes.begin()->template get<std::string>("Rep").get().find("Value") != std::string::npos);    
+    EXPECT_TRUE(configScopes.begin()->template get<std::string>("Rep").get().find("Value") != std::string::npos);
 }
 
 TYPED_TEST(ConfigShould, supportMultipleScopes2)
@@ -201,7 +201,7 @@ TYPED_TEST(ConfigShould, supportMultipleScopes2)
     this->loadConfig();
     auto configScopes = this->config->scopes("ConfigShould.Repeated");
     ASSERT_EQ(2,configScopes.size());
-    EXPECT_TRUE(configScopes.begin()->template get<std::string>("Rep").get().find("Value") != std::string::npos);    
+    EXPECT_TRUE(configScopes.begin()->template get<std::string>("Rep").get().find("Value") != std::string::npos);
 }
 
 TYPED_TEST(ConfigShould, returnMultipleParameters)
@@ -218,15 +218,27 @@ TYPED_TEST(ConfigShould, returnMultipleParameters)
 TYPED_TEST(ConfigShould, supportArraysJsonArrays)
 {
     this->loadConfig();
-    
+
     auto scope = this->config->scope("ConfigShould");
     auto&& values = scope.template getAll<std::string>("Array.");
-    
+
     ASSERT_EQ(3, values.size());
-    
+
     EXPECT_EQ(std::string("Elem1"),values[0]);
     EXPECT_EQ(std::string("Elem2"),values[1]);
     EXPECT_EQ(std::string("Elem3"),values[2]);
+}
+
+TYPED_TEST(ConfigShould, supportInjectingNodes)
+{
+    this->loadConfig();
+
+    auto scope = this->config->scope("ConfigShould.Injected");
+
+    EXPECT_EQ(std::string("filename")  , scope.template get<std::string>("SessionFile"));
+    EXPECT_EQ(std::string("/root/data"), scope.template get<std::string>("DataPath"));
+    EXPECT_EQ(std::string("STH-20-2")  , scope.template get<std::string>("SessionUniqueId2"));
+    EXPECT_EQ(std::string("Enabled"),    scope.template get<std::string>("SessionStatus"));
 }
 
 } // namespace dconfig

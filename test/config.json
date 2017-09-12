@@ -12,18 +12,19 @@
             "SessionUniqueId2" : "%config.ConfigShould.System.SessionUniqueId%-2",
             "SessionStatus"    : "Disabled",
             "SessionStatus2"   : "%config.ConfigShould.System.SessionStatus%"
-        },        
-        "Repeated":
-        {
-            "Rep": "Value1",
-            "Rep": "Value2",
-            "Rep": "Value3"
         },
         "Repeated":
         {
-            "Rep": "Value4",
-            "Rep": "Value5",
-            "Rep": "Value6"            
-        }
+            "Rep"  : "Value1",
+            "Rep"  : "Value2",
+            "Rep"  : "Value3"
+        },
+        "Repeated" :
+        {
+            "Rep"  : "Value4",
+            "Rep"  : "Value5",
+            "Rep"  : "Value6"
+        },
+        "Injected" : "%node.ConfigShould.System%"
     }
 }

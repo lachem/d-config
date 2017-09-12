@@ -16,7 +16,7 @@ struct InitFactory
 {
     typedef Config::separator_type separator_type;
 
-    InitFactory(int argc, char** argv, const separator_type& aSeparator = separator_type());
+    explicit InitFactory(int argc, char** argv, const separator_type& aSeparator = separator_type());
 
     Config create() const;
 

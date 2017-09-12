@@ -42,7 +42,7 @@ struct ConfigRoot
 
     ConfigRoot(ConfigRoot&&) = delete;
     ConfigRoot(const ConfigRoot&) = delete;
-    bool operator=(const ConfigRoot&) = delete;
+    ConfigRoot& operator=(const ConfigRoot&) = delete;
 
     const tree_type& getTree() const { return ptree; }
 

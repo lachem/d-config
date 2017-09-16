@@ -5,7 +5,9 @@
 
 //local
 #include "config.hpp"
-#include "envvar_expander.hpp"
+#include "env_var_expander.hpp"
+#include "config_param_expander.hpp"
+#include "config_node_expander.hpp"
 
 //std
 #include <cassert>
@@ -17,25 +19,24 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/xpressive/regex_primitives.hpp>
 
-namespace dconfig
-{
-namespace detail
-{
+namespace dconfig {
+namespace detail {
 
-// --------------------------------------------------------------------------------
 void ConfigRoot::parse(const std::vector<std::string>& contents)
 {
     for(auto&& config : contents)
     {
-        auto&& expanded = EnvVarExpander()(config);
+        auto expanded = config;
+        EnvVarExpander()(expanded);
+
         boost::trim(expanded);
         auto mergeFrom = buildPropertyTree(expanded);
         mergePropertyTree(ptree,mergeFrom);
     }
     if(!contents.empty())
     {
-        expandConfigParameters(ptree);
-        expandConfigNodes(ptree);
+        ConfigParamExpander()(ptree);
+        ConfigNodeExpander()(ptree);
     }
 }
 
@@ -122,100 +123,6 @@ void ConfigRoot::mergePropertyTree(
     {
         auto itMergeFrom = mergeFrom.to_iterator(currMergeFrom);
         mergeTo.add_child(itMergeFrom->first, itMergeFrom->second);
-    }
-}
-
-// --------------------------------------------------------------------------------
-struct ConfigVarExpander
-{
-    ConfigVarExpander(const boost::property_tree::ptree* ptree) : ptree(ptree) {};
-
-    std::string operator() (const boost::xpressive::smatch& what) const
-    {
-        assert(what.size()>1);
-
-        try
-        {
-            return ptree->get<std::string>((++what.begin())->str().c_str());
-        }
-        catch(...)
-        {
-            return what.str();
-        }
-    }
-
-    const boost::property_tree::ptree* ptree;
-};
-
-
-void ConfigRoot::expandConfigParameters(boost::property_tree::ptree& ptree)
-{
-    using namespace boost::xpressive;
-
-    sregex configParamMatch = "%config." >> (s1 = -+_) >> "%";
-    expandConfigParameters(ptree, ptree, configParamMatch);
-}
-
-void ConfigRoot::expandConfigParameters(
-    const boost::property_tree::ptree& rootNode
-  , boost::property_tree::ptree& currNode
-  , const boost::xpressive::sregex& match)
-{
-    using namespace boost::xpressive;
-
-    for(auto&& node : currNode)
-    {
-        if(node.second.empty())
-        {
-            std::string value = node.second.get_value<std::string>();
-            node.second.put_value(regex_replace(value, match, ConfigVarExpander(&rootNode)));
-        }
-        else
-        {
-            expandConfigParameters(rootNode, node.second, match);
-        }
-    }
-}
-
-// --------------------------------------------------------------------------------
-void ConfigRoot::expandConfigNodes(boost::property_tree::ptree& ptree)
-{
-    using namespace boost::xpressive;
-    using namespace regex_constants;
-
-    sregex configNodeMatch = *(blank | _ln) >> "%node." >> (s1 = -+_) >> "%" >> *(blank | _ln);
-    expandConfigNodes(ptree, ptree, configNodeMatch);
-}
-
-void ConfigRoot::expandConfigNodes(
-    const boost::property_tree::ptree& rootNode
-  , boost::property_tree::ptree& currNode
-  , const boost::xpressive::sregex& match)
-{
-    using namespace boost::xpressive;
-
-    for(auto&& node : currNode)
-    {
-        if(node.second.empty())
-        {
-            auto&& value = node.second.get_value<std::string>();
-            smatch what;
-            if (regex_match(value, what, match))
-            {
-                assert(what.size()>1);
-
-                auto&& position = (++what.begin())->str().c_str();
-                auto&& subtree = rootNode.get_child_optional(position);
-                if (subtree)
-                {
-                    currNode.put_child(node.first, *subtree);
-                }
-            }
-        }
-        else
-        {
-            expandConfigNodes(rootNode, node.second, match);
-        }
     }
 }
 

@@ -14,10 +14,8 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/xpressive/xpressive.hpp>
 
-namespace dconfig
-{
-namespace detail
-{
+namespace dconfig {
+namespace detail {
 
 struct ConfigRoot
 {
@@ -48,26 +46,12 @@ struct ConfigRoot
 
 private:
     void parse(const std::vector<std::string>& contents);
-    std::string expandEnvParameters(const std::string& contents);
+
     boost::property_tree::ptree buildPropertyTree(const std::string& contents);
 
     void mergePropertyTree(
         boost::property_tree::ptree& mergeTo
       , const boost::property_tree::ptree& currNode);
-
-    void expandConfigParameters(
-        boost::property_tree::ptree& ptree);
-    void expandConfigParameters(
-        const boost::property_tree::ptree& rootNode
-      , boost::property_tree::ptree& currNode
-      , const boost::xpressive::sregex& match);
-
-    void expandConfigNodes(
-        boost::property_tree::ptree& ptree);
-    void expandConfigNodes(
-        const boost::property_tree::ptree& rootNode
-      , boost::property_tree::ptree& currNode
-      , const boost::xpressive::sregex& match);
 
     boost::property_tree::ptree ptree;
     Separator separator;

@@ -21,25 +21,17 @@ namespace dconfig
 namespace detail
 {
 
-void ConfigRoot::parse(const std::vector<std::string>& contents)
-{
-    for(auto&& config : contents)
-    {
-        auto&& expanded = expandEnvParameters(config);
-        boost::trim(expanded);
-        auto mergeFrom = buildPropertyTree(expanded);
-        mergePropertyTree(ptree,mergeFrom);
-    }
-    if(!contents.empty())
-    {
-        expandConfigParameters(ptree);
-        expandConfigNodes(ptree);
-    }
-}
-
 // --------------------------------------------------------------------------------
 struct EnvVarExpander
 {
+    std::string operator()(const std::string& contents)
+    {
+        using namespace boost::xpressive;
+
+        sregex env = "%env." >> (s1 = -+_) >> "%";
+        return std::move(regex_replace(contents, env, *this));
+    }
+
     std::string operator() (const boost::xpressive::smatch& what) const
     {
         assert(what.size()>1);
@@ -49,12 +41,21 @@ struct EnvVarExpander
     }
 };
 
-std::string ConfigRoot::expandEnvParameters(const std::string& contents)
+// --------------------------------------------------------------------------------
+void ConfigRoot::parse(const std::vector<std::string>& contents)
 {
-    using namespace boost::xpressive;
-
-    sregex env = "%env." >> (s1 = -+_) >> "%";
-    return std::move(regex_replace(contents, env, EnvVarExpander()));
+    for(auto&& config : contents)
+    {
+        auto&& expanded = EnvVarExpander()(config);
+        boost::trim(expanded);
+        auto mergeFrom = buildPropertyTree(expanded);
+        mergePropertyTree(ptree,mergeFrom);
+    }
+    if(!contents.empty())
+    {
+        expandConfigParameters(ptree);
+        expandConfigNodes(ptree);
+    }
 }
 
 // --------------------------------------------------------------------------------

@@ -104,12 +104,10 @@ struct Config
     std::vector<T> getAll(const std::string& path) const
     {
         std::vector<T> result;
-        auto subtree = tree;
         auto split = splitPath(path);
-        if(!split.first.empty())
-        {
-            subtree = getSubtree(split.first);
-        }
+        auto subtree = (!split.first.empty())
+            ? getSubtree(split.first)
+            : tree;
         if(subtree)
         {
             auto range = subtree->equal_range(split.second);
@@ -131,12 +129,10 @@ struct Config
     std::vector<Config> scopes(const std::string& path) const
     {
         std::vector<Config> result;
-        auto subtree = tree;
         auto split = splitPath(path);
-        if(!split.first.empty())
-        {
-            subtree = getSubtree(split.first);
-        }
+        auto subtree = (!split.first.empty())
+            ? getSubtree(split.first)
+            : tree;
         if(subtree)
         {
             auto range = subtree->equal_range(split.second);

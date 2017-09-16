@@ -1,5 +1,8 @@
 #!/bin/bash
 
+mkdir -p bin
+mkdir -p lib
+
 if   [ "$1" = "release" ]; then
     cmake . -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release
 elif [ "$1" = "debug"   ]; then

@@ -38,6 +38,7 @@ set(GMOCK_LIBRARY "$ENV{GMOCK_ROOT}/lib/libgmock.so")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin/")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib/")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib/")
 
 #########################
 # Common compiler flags #
@@ -70,17 +71,37 @@ include_directories(
     src
     test
 )
-file(GLOB_RECURSE SOURCES src/*.cpp)
-file(GLOB_RECURSE TESTS test/*.cpp)
 
-add_executable(test
-    ${SOURCES}
-    ${TESTS}
+file(GLOB_RECURSE SOURCES src/*.cpp)
+file(GLOB_RECURSE UNITS test/unit/*.cpp)
+file(GLOB_RECURSE PERFS test/perf/*.cpp)
+file(GLOB TESTF test/*.cpp)
+
+add_library(dconfig
+   ${SOURCES}
 )
 
-target_link_libraries(test
-    pthread
+add_executable(unit
+    ${TESTF}
+    ${UNITS}
+)
+
+target_link_libraries(unit
+    dconfig
     ${Boost_LIBRARIES}
     ${GMOCK_LIBRARY}
+    pthread
+)
+
+add_executable(perf
+    ${TESTF}
+    ${PERFS}
+)
+
+target_link_libraries(perf
+    dconfig
+    ${Boost_LIBRARIES}
+    ${GMOCK_LIBRARY}
+    pthread
 )
 

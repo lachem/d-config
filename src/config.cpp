@@ -5,6 +5,7 @@
 
 //local
 #include "config.hpp"
+#include "envvar_expander.hpp"
 
 //std
 #include <cassert>
@@ -20,26 +21,6 @@ namespace dconfig
 {
 namespace detail
 {
-
-// --------------------------------------------------------------------------------
-struct EnvVarExpander
-{
-    std::string operator()(const std::string& contents)
-    {
-        using namespace boost::xpressive;
-
-        sregex env = "%env." >> (s1 = -+_) >> "%";
-        return std::move(regex_replace(contents, env, *this));
-    }
-
-    std::string operator() (const boost::xpressive::smatch& what) const
-    {
-        assert(what.size()>1);
-
-        const char* env = getenv((++what.begin())->str().c_str());
-        return env ? env : what.str();
-    }
-};
 
 // --------------------------------------------------------------------------------
 void ConfigRoot::parse(const std::vector<std::string>& contents)

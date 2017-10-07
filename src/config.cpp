@@ -13,6 +13,7 @@
 //boost
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
@@ -21,36 +22,11 @@
 #include <queue>
 #include <string>
 #include <vector>
-#include <iostream>
 #include <memory>
 #include <utility>
 
 namespace dconfig {
 namespace detail {
-
-template<typename S>
-void print(S&& stream, const boost::property_tree::ptree& source, const std::string& indent)
-{
-    for (const auto& node : source)
-    {
-        if (node.second.empty())
-        {
-            std::cout << std::endl << indent << node.first << " = " << node.second.get_value<std::string>();
-        }
-        else
-        {
-            std::cout << std::endl << indent << node.first;
-            print(stream, node.second, indent + "    ");
-        }
-    }
-}
-
-template<typename S>
-S& operator << (S&& stream, const boost::property_tree::ptree& source)
-{
-    print(stream, source, "");
-    return stream;
-}
 
 // --------------------------------------------------------------------------------
 std::shared_ptr<Node> buildCustomTree(const boost::property_tree::ptree& source)
@@ -91,42 +67,6 @@ std::shared_ptr<Node> buildCustomTree(const boost::property_tree::ptree& source)
 }
 
 // --------------------------------------------------------------------------------
-void ConfigRoot::parse(const std::vector<std::string>& contents)
-{
-    Node stopa;
-    for(auto&& config : contents)
-    {
-        auto expanded = config;
-        EnvVarExpander()(expanded);
-
-        boost::trim(expanded);
-        auto mergeFrom = buildPropertyTree(expanded);
-        auto dupa = buildCustomTree(mergeFrom);
-
-        mergePropertyTree(ptree,mergeFrom);
-        stopa.overwrite(std::move(*dupa));
-    }
-
-    std::cout << std::endl << "*** MERGED PTREE ***"  << ptree << std::endl;
-    std::cout << std::endl << "*** MERGED CUSTOM ***" << stopa << std::endl;
-
-    if(!contents.empty())
-    {
-        ConfigParamExpander()(ptree);
-        ConfigNodeExpander()(ptree);
-    }
-    std::cout << std::endl << "*** EXPANDED PTREE ***"  << ptree << std::endl;
-
-    if(!stopa.empty())
-    {
-        ConfigParamExpanderNew()(stopa);
-        ConfigNodeExpanderNew()(stopa);
-    }
-
-    std::cout << std::endl << "*** EXPANDED CUSTOM ***" << stopa << std::endl;
-}
-
-// --------------------------------------------------------------------------------
 inline bool isXml(const std::string& contents)
 {
     return contents[0] == '<';
@@ -137,7 +77,7 @@ inline bool isJson(const std::string& contents)
     return contents[0] == '{';
 }
 
-boost::property_tree::ptree ConfigRoot::buildPropertyTree(const std::string& contents)
+boost::property_tree::ptree buildPropertyTree(const std::string& contents)
 {
     std::stringstream contentStream;
     contentStream.str(contents);
@@ -160,56 +100,23 @@ boost::property_tree::ptree ConfigRoot::buildPropertyTree(const std::string& con
 }
 
 // --------------------------------------------------------------------------------
-void ConfigRoot::mergePropertyTree(
-    boost::property_tree::ptree& mergeTo
-  , const boost::property_tree::ptree& mergeFrom)
-{
-    using namespace boost::property_tree;
-
-    auto currMergeTo = mergeTo.ordered_begin();
-    auto endMergeTo = mergeTo.not_found();
-
-    auto currMergeFrom = mergeFrom.ordered_begin();
-    auto endMergeFrom = mergeFrom.not_found();
-
-    if(currMergeTo == endMergeTo)
+void ConfigRoot::parse(const std::vector<std::string>& contents)
+{    
+    for(auto&& config : contents)
     {
-        mergeTo = mergeFrom;
-    }
+        auto expanded = config;
+        EnvVarExpander()(expanded);
 
-    while(currMergeTo != endMergeTo && currMergeFrom != endMergeFrom)
+        boost::trim(expanded);
+        auto mergeFrom = buildCustomTree(buildPropertyTree(expanded));
+        node.overwrite(std::move(*mergeFrom));
+    }
+    
+    if(!node.empty())
     {
-        auto itMergeTo   = mergeTo.to_iterator(currMergeTo);
-        auto itMergeFrom = mergeFrom.to_iterator(currMergeFrom);
-
-        if(itMergeTo->first > itMergeFrom->first)
-        {
-            mergeTo.add_child(itMergeFrom->first, itMergeFrom->second);
-            ++currMergeFrom;
-            continue;
-        }
-
-        if(itMergeTo->first == itMergeFrom->first)
-        {
-            if(itMergeFrom->second.empty())
-            {
-                mergeTo.put("", itMergeFrom->second.data());
-            }
-            mergePropertyTree(itMergeTo->second, itMergeFrom->second);
-            ++currMergeFrom;
-        }
-
-        if(itMergeTo->first <= itMergeFrom->first)
-        {
-            ++currMergeTo;
-        }
-    }
-
-    for(;currMergeFrom != endMergeFrom; ++currMergeFrom)
-    {
-        auto itMergeFrom = mergeFrom.to_iterator(currMergeFrom);
-        mergeTo.add_child(itMergeFrom->first, itMergeFrom->second);
-    }
+        ConfigParamExpander()(node);
+        ConfigNodeExpander()(node);
+    }    
 }
 
 } //namespace detail

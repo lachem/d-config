@@ -137,7 +137,7 @@ TYPED_TEST(ConfigShould, expandEnvironmentVariables2)
 TYPED_TEST(ConfigShould, allowSlashSeperator)
 {
     setenv("SOURCE","/source",1);
-    this->loadConfig(::dconfig::Config::separator_type("/"));
+    this->loadConfig(::dconfig::Config::separator_type('/'));
     EXPECT_EQ(std::string("/source/data"), this->config->template get<std::string>("ConfigShould/System/FixConfig"));
 }
 

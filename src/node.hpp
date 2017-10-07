@@ -4,15 +4,25 @@
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/sequenced_index.hpp>
 #include <boost/multi_index/ordered_index.hpp>
-#include <boost/multi_index/identity.hpp> 
-#include <boost/multi_index/member.hpp> 
+#include <boost/multi_index/hashed_index.hpp>
+#include <boost/multi_index/identity.hpp>
+#include <boost/multi_index/member.hpp>
+#include <boost/multi_index/mem_fun.hpp>
+#include <boost/utility/string_ref.hpp>
 #include <boost/variant.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/functional/hash.hpp>
 
 //std
 #include <memory>
 #include <utility>
-#include <string>
 #include <vector>
+#include <string>
+#include <functional>
+#include <cstring>
+
+#include <iostream>
 
 namespace dconfig {
 namespace detail {
@@ -21,46 +31,80 @@ class Node
 {
     struct sequenced {};
     struct ordered {};
+    struct referenced {};
 
+public:
     using value_type = std::string;
     using node_type  = std::shared_ptr<Node>;
-    
+
     using value_list = std::vector<value_type>;
     using node_list  = std::vector<node_type>;
-    
+
     //TODO: For optimization reasons we might want to extend the variant with single value
     using node_value_list = boost::variant<node_list, value_list>;
-    using element_type = std::pair<std::string, node_value_list>;
-    
+
+    struct ElementType
+    {
+        struct HashByKeyRef : std::unary_function<boost::string_ref, size_t>
+        {
+            std::size_t operator()(const boost::string_ref& value) const
+            {
+                return boost::hash_range(value.begin(), value.end());
+            }
+        };
+
+        boost::string_ref keyRef() const { return boost::string_ref(key); }
+
+        std::string key;
+        node_value_list value;
+    };
+
     using children_container = boost::multi_index::multi_index_container
-        < element_type
+        < ElementType
         , boost::multi_index::indexed_by
             < boost::multi_index::ordered_unique
-                < boost::multi_index::tag<ordered>                
-                , boost::multi_index::member<element_type, std::string, &element_type::first>>
-            , boost::multi_index::sequenced 
+                < boost::multi_index::tag<ordered>
+                , boost::multi_index::member<ElementType, std::string, &ElementType::key>>
+            , boost::multi_index::hashed_unique
+                < boost::multi_index::tag<referenced>
+                , boost::multi_index::const_mem_fun<ElementType, boost::string_ref, &ElementType::keyRef>
+                , ElementType::HashByKeyRef>
+            , boost::multi_index::sequenced
                 < boost::multi_index::tag<sequenced>> >>;
-                
-public:
+
+
     using iterator       = decltype(std::declval<children_container>().get<sequenced>().begin());
     using const_iterator = decltype(std::declval<children_container>().get<sequenced>().cbegin());
-    
+
+    template<typename S>
+    friend S& operator << (S&& stream, const Node& node)
+    {
+        node.print(stream, "");
+
+        return stream;
+    }
+
     template<typename T>
     void setValue(const std::string& key, T&& value)
-    {   
+    {
         auto&& it = children.get<ordered>().find(key);
         if (it == children.get<ordered>().end())
         {
-            children.get<sequenced>().push_back({key, value_list{std::forward<T>(value)}});            
+            children.get<sequenced>().push_back({key, value_list{std::forward<T>(value)}});
         }
-        else       
+        else
         {
-            children.get<ordered>().modify(it, 
-                [&value](element_type& element)
+            children.get<ordered>().modify(it,
+                [&value](ElementType& element)
                 {
-                    if (auto list = boost::get<value_list>(&element.second))
+                    if (auto list = boost::get<value_list>(&element.value))
                     {
                         list->emplace_back(std::forward<T>(value));
+                    }
+                    else
+                    if (auto list = boost::get<node_list>(&element.value))
+                    {
+                        element.value = value_list{std::forward<T>(value)};
                     }
                 });
         }
@@ -72,102 +116,195 @@ public:
         auto&& it = children.get<ordered>().find(key);
         if (it == children.get<ordered>().end())
         {
-            children.get<sequenced>().push_back({key, node_list{std::forward<T>(node)}});            
+            children.get<sequenced>().push_back({key, node_list{std::forward<T>(node)}});
         }
         else
         {
-            children.get<ordered>().modify(it, 
-                [&node](element_type& element)
+            children.get<ordered>().modify(it,
+                [&node](ElementType& element)
                 {
-                    if (auto list = boost::get<node_list>(&element.second))
+                    if (auto list = boost::get<node_list>(&element.value))
                     {
                         list->emplace_back(std::forward<T>(node));
+                    }
+                    else
+                    if (auto list = boost::get<value_list>(&element.value))
+                    {
+                        element.value = node_list{std::forward<T>(node)};
                     }
                 });
         }
     }
-    
-    void overwrite(Node&& other) 
+
+    //FIXME: getValues and getNodes are somewhat incosistent, sometimes they are recursive
+    //       and sometimes they just look into immediate children. We need to somehow
+    //       distinguish one from the other api-wise
+    template<typename... K>
+    const value_list& getValues(const boost::string_ref& key1, const boost::string_ref& key2, K&&... keys) const
     {
-        auto currMergeTo = this->children.get<ordered>().begin();
-        auto endMergeTo  = this->children.get<ordered>().end();
-        
-        auto currMergeFrom = other.children.get<ordered>().begin();
-        auto endMergeFrom  = other.children.get<ordered>().end();
+        static const value_list empty;
 
-        if(currMergeTo == endMergeTo)
+        auto&& nodes = getNodes(key1);
+        return (!nodes.empty())
+            ? nodes[0]->getValues(key2, keys...)
+            : noValues();
+    }
+
+    const value_list& getValues(const boost::string_ref& key) const
+    {
+        auto&& child = children.get<referenced>().find(key);
+        if (child != children.get<referenced>().end())
         {
-            *this = std::move(other);
+            if (auto&& elem = boost::get<value_list>(&child->value))
+            {
+                return *elem;
+            }
         }
 
-        while(currMergeTo != endMergeTo && currMergeFrom != endMergeFrom)
+        return noValues();
+    }
+
+    const value_list& getValues(const char* key, char separator) const
+    {
+        if (key)
         {
-            if(currMergeTo->first > currMergeFrom->first)
+            if (auto&& first = std::strchr(key, separator))
             {
-                currMergeTo = this->children.insert(currMergeTo, {currMergeFrom->first, currMergeFrom->second});
-                ++currMergeTo;
-                ++currMergeFrom;                
-            }
-            else
-            if(currMergeTo->first == currMergeFrom->first)
-            {
-                auto&& nodeListTo   = boost::get<node_list>(&currMergeTo->second);
-                auto&& nodeListFrom = boost::get<node_list>(&currMergeFrom->second);
-                if (nodeListTo && nodeListFrom)
+                auto&& nodes = this->getNodes(boost::string_ref(key, first - key));
+                if (!nodes.empty())
                 {
-                   (*nodeListTo)[0]->overwrite(std::move(*(*nodeListFrom)[0]));
+                    return nodes[0]->getValues(first + 1, separator);
                 }
-                else
-                {                    
-                    this->children.get<ordered>().modify(currMergeTo, 
-                        [&currMergeFrom](element_type& element)
-                        {
-                                element.second = std::move(const_cast<node_value_list&>(currMergeFrom->second));
-                        });
-                }
-                ++currMergeFrom;
-                ++currMergeTo;
             }
             else
-            if(currMergeTo->first < currMergeFrom->first)
             {
-                ++currMergeTo;
+                return this->getValues(boost::string_ref(key, std::strlen(key)));
             }
         }
-        
-        for(;currMergeFrom != endMergeFrom; ++currMergeFrom)
+
+        return noValues();
+    }
+
+    const value_list& getValues(const std::string& key, char separator) const
+    {
+        return this->getValues(key.c_str(), separator);
+    }
+
+    template<typename... K>
+    const node_list& getNodes(const boost::string_ref& key1, const boost::string_ref& key2, K&&... keys) const
+    {
+        static const node_list empty;
+
+        auto&& nodes = getNodes(key1);
+        return (!nodes.empty())
+            ? nodes[0]->getNodes(key2, keys...)
+            : noNodes();
+    }
+
+    const node_list& getNodes(const boost::string_ref& key) const
+    {
+        auto&& child = children.get<referenced>().find(key);
+        if (child != children.get<referenced>().end())
         {
-            this->children.insert({currMergeFrom->first, currMergeFrom->second});            
+            if (auto&& elem = boost::get<node_list>(&child->value))
+            {
+                return *elem;
+            }
+        }
+
+        return noNodes();
+    }
+
+    const node_list& getNodes(const char* key, char separator) const
+    {
+        if (key)
+        {
+            if (auto&& first = std::strrchr(key, separator))
+            {
+                auto&& nodes = this->getNodes(boost::string_ref(key, first - key));
+                if (!nodes.empty())
+                {
+                    return nodes[0]->getNodes(first + 1, separator);
+                }
+            }
+            else
+            {
+                return this->getNodes(boost::string_ref(key, std::strlen(key)));
+            }
+        }
+
+        return noNodes();
+    }
+
+    const node_list& getNodes(const std::string& key, char separator) const
+    {
+        return getNodes(key.c_str(), separator);
+    }
+
+    template<typename V>
+    void accept(V&& visitor)
+    {
+        for(auto&& child : *this)
+        {
+            if (auto&& elem = boost::get<detail::Node::value_list>(&child.value))
+            {
+                for (auto&& value : *elem)
+                {
+                    //NOTE: const_cast is safe here as we are not touching the key
+                    visitor.visit(*this, child.key, const_cast<std::string&>(value));
+                }
+            }
+            else
+            if (auto&& elem = boost::get<detail::Node::node_list>(&child.value))
+            {
+                for (auto&& node : *elem)
+                {
+                    visitor.visit(*this, child.key, *node);
+                }
+            }
         }
     }
 
-    const const_iterator begin() const
+    void erase(const std::string& key)
+    {
+        children.get<referenced>().erase(key);
+    }
+
+    bool empty() const
+    {
+        return children.empty();
+    }
+
+    const_iterator cbegin() const
     {
         return children.get<sequenced>().begin();
     }
-    
-    const const_iterator end() const
+
+    const_iterator cend() const
     {
         return children.get<sequenced>().end();
     }
-    
-    template<typename S>
-    friend S& operator << (S&& stream, const Node& node)
+
+    const_iterator begin() const
     {
-        node.print(stream, "");
-        
-        return stream;
+        return children.get<sequenced>().begin();
     }
-    
-private:  
+
+    const_iterator end() const
+    {
+        return children.get<sequenced>().end();
+    }
+    void overwrite(Node&& other);
+
+private:
     template<typename S>
     void print(S& stream, const std::string& indent) const
     {
         for (const auto& child : children.get<sequenced>())
         {
-            if (auto&& elem = boost::get<value_list>(&child.second))
+            if (auto&& elem = boost::get<value_list>(&child.value))
             {
-                stream << std::endl << indent << child.first << " = [";
+                stream << std::endl << indent << child.key << " = [";
                 for (const auto& value : *elem)
                 {
                     stream << value << ",";
@@ -175,15 +312,27 @@ private:
                 stream << "]";
             }
             else
-            if (auto&& elem = boost::get<node_list>(&child.second))
+            if (auto&& elem = boost::get<node_list>(&child.value))
             {
-                stream << std::endl << indent << child.first;
+                stream << std::endl << indent << child.key;
                 for (const auto& node : *elem)
                 {
                     node->print(stream, indent + "    ");
                 }
             }
         }
+    }
+
+    static const value_list& noValues()
+    {
+        static const value_list empty;
+        return empty;
+    }
+
+    static const node_list& noNodes()
+    {
+        static const node_list empty;
+        return empty;
     }
 
     children_container children;

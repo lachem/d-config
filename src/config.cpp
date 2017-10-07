@@ -86,9 +86,6 @@ std::shared_ptr<Node> buildCustomTree(const boost::property_tree::ptree& source)
             queue.swap(next);
         }
     }
-        
-    // std::cout << "*** PTREE ***"  << std::endl << source << std::endl;
-    // std::cout << "*** CUSTOM ***" << std::endl << *result << std::endl;
 
     return result;
 }
@@ -105,20 +102,28 @@ void ConfigRoot::parse(const std::vector<std::string>& contents)
         boost::trim(expanded);
         auto mergeFrom = buildPropertyTree(expanded);
         auto dupa = buildCustomTree(mergeFrom);
-        
-        mergePropertyTree(ptree,mergeFrom);        
+
+        mergePropertyTree(ptree,mergeFrom);
         stopa.overwrite(std::move(*dupa));
     }
-    
+
     std::cout << std::endl << "*** MERGED PTREE ***"  << ptree << std::endl;
-    
+    std::cout << std::endl << "*** MERGED CUSTOM ***" << stopa << std::endl;
+
     if(!contents.empty())
     {
         ConfigParamExpander()(ptree);
         ConfigNodeExpander()(ptree);
     }
-    
-    std::cout << std::endl << "*** MERGED CUSTOM ***" << stopa << std::endl;
+    std::cout << std::endl << "*** EXPANDED PTREE ***"  << ptree << std::endl;
+
+    if(!stopa.empty())
+    {
+        ConfigParamExpanderNew()(stopa);
+        ConfigNodeExpanderNew()(stopa);
+    }
+
+    std::cout << std::endl << "*** EXPANDED CUSTOM ***" << stopa << std::endl;
 }
 
 // --------------------------------------------------------------------------------

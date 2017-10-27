@@ -6,6 +6,7 @@
 
 //local
 #include <node.hpp>
+#include <separator.hpp>
 #include <config_builder.hpp>
 
 //boost
@@ -20,10 +21,9 @@ namespace dconfig {
 
 struct Config
 {
-    typedef ConfigBuilder::Separator separator_type;
-    typedef ConfigBuilder::node_type node_type;
+    using node_type = ConfigBuilder::node_type;
 
-    explicit Config(const std::vector<std::string>& aFileList, const separator_type& aSeparator = separator_type())
+    explicit Config(const std::vector<std::string>& aFileList, const Separator& aSeparator = '.')
         : root(new ConfigBuilder(aFileList, aSeparator))
         , separator(aSeparator)
         , node(&root->getNode())
@@ -64,7 +64,7 @@ struct Config
     {
         static const std::vector<std::string> empty;
         return (node)
-            ? node->getValues(path, separator.value)
+            ? node->getValues(path, separator)
             : empty;
     }
 
@@ -72,7 +72,7 @@ struct Config
     {
         if (node)
         {
-            const auto& nodes = node->getNodes(path, separator.value);
+            const auto& nodes = node->getNodes(path, separator);
             if (!nodes.empty())
             {
                 return Config(root, nodes[0].get(), separator);
@@ -86,7 +86,7 @@ struct Config
         std::vector<Config> result;
         if(node)
         {
-            const auto& nodes = node->getNodes(path, separator.value);
+            const auto& nodes = node->getNodes(path, separator);
             for (const auto& sub : nodes)
             {
                 result.emplace_back(Config(root, sub.get(), separator));
@@ -103,14 +103,14 @@ struct Config
 private:
     Config(std::shared_ptr<ConfigBuilder> aConfigRoot
          , const node_type* aNode
-         , const separator_type& aSeparator)
+         , const Separator& aSeparator)
         : root(aConfigRoot)
         , separator(aSeparator)
         , node(aNode)
     {}
 
     std::shared_ptr<ConfigBuilder> root;
-    separator_type separator;
+    Separator separator;
     const node_type* node;
 };
 
@@ -119,7 +119,7 @@ inline boost::optional<std::string> Config::get<std::string>(const std::string& 
 {
     if(node)
     {
-        const auto& values = node->getValues(path, separator.value);
+        const auto& values = node->getValues(path, separator);
         if (!values.empty())
         {
             return boost::optional<std::string>(values[0]);
@@ -133,7 +133,7 @@ inline std::vector<std::string> Config::getAll<std::string>(const std::string& p
 {
     static std::vector<std::string> empty;
     return (node)
-        ? node->getValues(path, separator.value)
+        ? node->getValues(path, separator)
         : empty;
 }
 

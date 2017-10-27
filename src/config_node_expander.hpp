@@ -3,6 +3,9 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
+//local
+#include <separator.hpp>
+
 //boost
 #include <boost/property_tree/ptree.hpp>
 #include <boost/xpressive/xpressive.hpp>
@@ -12,7 +15,6 @@
 #include <cassert>
 
 namespace dconfig {
-
 
 class ConfigNodeExpander
 {
@@ -58,18 +60,22 @@ class ConfigNodeExpander
     };
 
 public:
+    explicit ConfigNodeExpander(const Separator& aSeparator)
+        : separator(aSeparator)
+    {
+    }
+
     void operator()(detail::Node& root)
     {
         using namespace boost::xpressive;
 
         sregex match = *(blank | _ln) >> "%node." >> (s1 = -+_) >> "%" >> *(blank | _ln);
 
+        std::vector<Replacement> replacements;
         root.accept(Visitor(&root, &match, &replacements));
-
         for (auto& replacement : replacements)
         {
-            // TODO: make separator a parameter
-            const auto& with = root.getNodes(replacement.with, '.');
+            const auto& with = root.getNodes(replacement.with, separator);
             if (!with.empty())
             {
                 replacement.at->setNode(replacement.of, with[0]);
@@ -78,7 +84,7 @@ public:
     }
 
 private:
-    std::vector<Replacement> replacements;
+    Separator separator;
 };
 
 } //namespace dconfig

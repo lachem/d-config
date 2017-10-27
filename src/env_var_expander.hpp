@@ -5,6 +5,9 @@
 
 #pragma once
 
+//local
+#include <separator.hpp>
+
 //boost
 #include <boost/xpressive/xpressive.hpp>
 
@@ -13,9 +16,11 @@
 
 namespace dconfig {
 
-/// Fulfills prebuild expander expander conept
+/// Fulfills prebuild expander conept
 struct EnvVarExpander
 {
+    explicit EnvVarExpander(const Separator&) {}
+
     void operator()(std::string& contents) const
     {
         using namespace boost::xpressive;

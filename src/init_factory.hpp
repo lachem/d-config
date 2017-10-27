@@ -14,9 +14,7 @@ namespace dconfig
 
 struct InitFactory
 {
-    typedef Config::separator_type separator_type;
-
-    explicit InitFactory(int argc, char** argv, const separator_type& aSeparator = separator_type());
+    explicit InitFactory(int argc, char** argv, const Separator& aSeparator = '.');
 
     Config create() const;
 
@@ -25,7 +23,7 @@ private:
 
     int argc;
     char** argv;
-    Config::separator_type separator;
+    Separator separator;
 };
 
 

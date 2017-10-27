@@ -6,7 +6,8 @@
 #pragma once
 
 //local
-#include "config.hpp"
+#include <config.hpp>
+#include <separator.hpp>
 
 //std
 #include <string>
@@ -17,10 +18,8 @@ namespace dconfig
 
 struct FileFactory
 {
-    typedef Config::separator_type separator_type;
-
     template<typename T>
-    explicit FileFactory(T&& aFileList, const separator_type& aSeparator = separator_type())
+    explicit FileFactory(T&& aFileList, const Separator& aSeparator = '.')
         : files(aFileList)
         , separator(aSeparator)
     {
@@ -35,7 +34,7 @@ private:
     std::vector<std::string> readFiles(const std::vector<std::string>& files) const;
 
     std::vector<std::string> files;
-    Config::separator_type separator;
+    Separator separator;
 };
 
 } //namespace dconfig

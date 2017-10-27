@@ -18,7 +18,7 @@ namespace po = boost::program_options;
 namespace dconfig
 {
 
-InitFactory::InitFactory(int anArgc, char** anArgv, const separator_type& aSeparator)
+InitFactory::InitFactory(int anArgc, char** anArgv, const Separator& aSeparator)
     : argc(anArgc)
     , argv(anArgv)
     , separator(aSeparator)

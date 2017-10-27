@@ -5,6 +5,7 @@
 
 //local
 #include <node.hpp>
+#include <separator.hpp>
 
 //boost
 #include <boost/property_tree/ptree.hpp>
@@ -20,8 +21,9 @@ class ConfigParamExpander
 {
     struct RegexExpander
     {
-        explicit RegexExpander(const detail::Node* node)
+        RegexExpander(const detail::Node* node, const Separator& aSeparator)
             : node(node)
+            , separator(aSeparator)
         {
         }
 
@@ -30,8 +32,7 @@ class ConfigParamExpander
             static const std::string empty;
             assert(what.size()>1);
 
-            // TODO: make separator a parameter
-            auto&& values = node->getValues((++what.begin())->str().c_str(), '.');
+            auto&& values = node->getValues((++what.begin())->str().c_str(), separator);
             if (!values.empty())
             {
                 return values[0];
@@ -41,20 +42,22 @@ class ConfigParamExpander
         }
 
         const detail::Node* node;
+        Separator separator;
     };
 
     struct Visitor
     {
-        explicit Visitor(detail::Node* root, const boost::xpressive::sregex* match)
+        Visitor(detail::Node* root, const boost::xpressive::sregex* match, const Separator& aSeparator)
             : match(match)
             , root(root)
+            , separator(aSeparator)
         {
         }
 
         void visit(detail::Node&, const std::string&, std::string& value)
         {
             using namespace boost::xpressive;
-            value = regex_replace(value, *match, RegexExpander(root));
+            value = regex_replace(value, *match, RegexExpander(root, separator));
         }
 
         void visit(detail::Node&, const std::string&, detail::Node& node)
@@ -64,17 +67,25 @@ class ConfigParamExpander
 
         const boost::xpressive::sregex* match;
         detail::Node* root;
+        Separator separator;
     };
 
 public:
+    explicit ConfigParamExpander(const Separator& aSeparator)
+        : separator(aSeparator)
+    {
+    }
+
     void operator()(detail::Node& root)
     {
         using namespace boost::xpressive;
 
         sregex match = "%config." >> (s1 = -+_) >> "%";
-
-        root.accept(Visitor(&root, &match));
+        root.accept(Visitor(&root, &match, separator));
     }
+
+private:
+    Separator separator;
 };
 
 } //namespace dconfig

@@ -49,8 +49,7 @@ struct Performance : ::testing::Test
         std::cout << "Average time: " << total/repetitions << "ns" << std::endl;
     }
 
-    ::dconfig::Config build(const ::dconfig::Config::separator_type& separator =
-            ::dconfig::Config::separator_type())
+    ::dconfig::Config build(const ::dconfig::Separator& separator = '.')
     {
         return ::dconfig::Config(files, separator);
     }

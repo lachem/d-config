@@ -104,7 +104,7 @@ void ConfigBuilder::parse(const std::vector<std::string>& contents)
     for(auto&& config : contents)
     {
         auto expanded = config;
-        EnvVarExpander()(expanded);
+        EnvVarExpander(separator).operator()(expanded);
 
         boost::trim(expanded);
         auto mergeFrom = buildCustomTree(buildPropertyTree(expanded));
@@ -113,8 +113,8 @@ void ConfigBuilder::parse(const std::vector<std::string>& contents)
 
     if(!node.empty())
     {
-        ConfigParamExpander()(node);
-        ConfigNodeExpander()(node);
+        ConfigParamExpander(separator).operator()(node);
+        ConfigNodeExpander(separator).operator()(node);
     }
 }
 

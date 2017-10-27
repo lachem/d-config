@@ -17,27 +17,15 @@
 
 namespace dconfig {
 
-// TODO: ConfigBuilder is now a builder and should be moved to separate compilation unit
 // TODO: Add parameters for prebuild and postbuild expanders (executed in provided sequence)
 struct ConfigBuilder
 {
-    struct Separator
-    {
-        Separator() : value(default_value()) {}
-        Separator(char value) : value(value) {}
-        Separator(const Separator&) = default;
-
-        static char default_value() { return '.'; }
-
-        char value;
-    };
-
     using node_type = detail::Node;
 
-    explicit ConfigBuilder(const std::vector<std::string>& contents, Separator aSeparator = Separator())
+    explicit ConfigBuilder(const std::vector<std::string>& aContents, Separator aSeparator = '.')
         : separator(aSeparator)
     {
-        parse(contents);
+        parse(aContents);
     }
 
     ConfigBuilder(ConfigBuilder&&) = delete;

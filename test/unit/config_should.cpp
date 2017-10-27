@@ -17,10 +17,8 @@
 using testing::Test;
 using testing::_;
 
-namespace test
-{
-namespace dconfig
-{
+namespace test {
+namespace dconfig {
 
 struct XmlExtension
 {
@@ -118,6 +116,12 @@ TYPED_TEST(ConfigShould, returnSingleParameters)
 {
     this->loadConfig();
     EXPECT_EQ(std::string("filename"), this->config->template get<std::string>("ConfigShould.System.SessionFile"));
+}
+
+TYPED_TEST(ConfigShould, returnSingleParametersByRef)
+{
+    this->loadConfig();
+    EXPECT_EQ(std::string("filename"), this->config->getRef("ConfigShould.System.SessionFile")[0]);
 }
 
 TYPED_TEST(ConfigShould, expandEnvironmentVariables)
@@ -226,6 +230,41 @@ TYPED_TEST(ConfigShould, supportArraysJsonArrays)
 
     EXPECT_EQ(std::string("Elem1"),values[0]);
     EXPECT_EQ(std::string("Elem2"),values[1]);
+    EXPECT_EQ(std::string("Elem3"),values[2]);
+}
+
+TYPED_TEST(ConfigShould, supportArraysByRef)
+{
+    this->loadConfig();
+
+    auto scope = this->config->scope("ConfigShould");
+    const auto& values = scope.getRef("Array.");
+
+    ASSERT_EQ(3, values.size());
+
+    EXPECT_EQ(std::string("Elem1"),values[0]);
+    EXPECT_EQ(std::string("Elem2"),values[1]);
+    EXPECT_EQ(std::string("Elem3"),values[2]);
+}
+
+TYPED_TEST(ConfigShould, provideValuesByRefFromInternalRepresentation)
+{
+    this->loadConfig();
+
+    auto overwrite = "Overwritten";
+    auto scope = this->config->scope("ConfigShould");
+
+    // force modify internal representation
+    {
+        const auto& values = scope.getRef("Array.");
+        (const_cast<std::vector<std::string>&>(values))[1] = overwrite;
+    }
+
+    const auto& values = scope.getRef("Array.");
+    ASSERT_EQ(3, values.size());
+
+    EXPECT_EQ(std::string("Elem1"),values[0]);
+    EXPECT_EQ(overwrite           ,values[1]);
     EXPECT_EQ(std::string("Elem3"),values[2]);
 }
 

@@ -42,12 +42,12 @@ struct ConfigRoot
     ConfigRoot(ConfigRoot&&) = delete;
     ConfigRoot(const ConfigRoot&) = delete;
     ConfigRoot& operator=(const ConfigRoot&) = delete;
-    
+
     const node_type& getNode() const { return node; }
 
 private:
     void parse(const std::vector<std::string>& contents);
-    
+
     Separator separator;
     node_type node;
 };
@@ -56,11 +56,11 @@ private:
 
 struct Config
 {
-    typedef detail::ConfigRoot::Separator separator_type;    
+    typedef detail::ConfigRoot::Separator separator_type;
     typedef detail::ConfigRoot::node_type node_type;
 
     explicit Config(const std::vector<std::string>& aFileList, const separator_type& aSeparator = separator_type())
-        : root(new detail::ConfigRoot(aFileList, aSeparator))        
+        : root(new detail::ConfigRoot(aFileList, aSeparator))
         , separator(aSeparator)
         , node(&root->getNode())
     {
@@ -92,8 +92,16 @@ struct Config
                 result.emplace_back(boost::lexical_cast<T>(value));
             }
         }
-        
+
         return result;
+    }
+
+    const std::vector<std::string>& getRef(const std::string& path) const
+    {
+        static const std::vector<std::string> empty;
+        return (node)
+            ? node->getValues(path, separator.value)
+            : empty;
     }
 
     Config scope(const std::string& path) const
@@ -102,7 +110,7 @@ struct Config
         {
             const auto& nodes = node->getNodes(path, separator.value);
             if (!nodes.empty())
-            {            
+            {
                 return Config(root, nodes[0].get(), separator);
             }
         }
@@ -111,12 +119,12 @@ struct Config
 
     std::vector<Config> scopes(const std::string& path) const
     {
-        std::vector<Config> result;                
+        std::vector<Config> result;
         if(node)
         {
             const auto& nodes = node->getNodes(path, separator.value);
             for (const auto& sub : nodes)
-            {                
+            {
                 result.emplace_back(Config(root, sub.get(), separator));
             }
         }
@@ -134,10 +142,10 @@ private:
          , const separator_type& aSeparator)
         : root(aConfigRoot)
         , separator(aSeparator)
-        , node(aNode)        
+        , node(aNode)
     {}
 
-    std::shared_ptr<detail::ConfigRoot> root;    
+    std::shared_ptr<detail::ConfigRoot> root;
     separator_type separator;
     const node_type* node;
 };

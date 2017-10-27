@@ -6,6 +6,7 @@
 
 //local
 #include <node.hpp>
+#include <config_builder.hpp>
 
 //boost
 #include <boost/lexical_cast.hpp>
@@ -16,53 +17,14 @@
 #include <memory>
 
 namespace dconfig {
-namespace detail {
-
-// TODO: ConfigRoot is now a builder and should be moved to separate compilation unit
-// TODO: Add parameters for prebuild and postbuild expanders (executed in provided sequence)
-struct ConfigRoot
-{
-    struct Separator
-    {
-        Separator() : value(default_value()) {}
-        Separator(char value) : value(value) {}
-        Separator(const Separator&) = default;
-
-        static char default_value() { return '.'; }
-
-        char value;
-    };
-
-    using node_type = Node;
-
-    explicit ConfigRoot(const std::vector<std::string>& contents, Separator aSeparator = Separator())
-        : separator(aSeparator)
-    {
-        parse(contents);
-    }
-
-    ConfigRoot(ConfigRoot&&) = delete;
-    ConfigRoot(const ConfigRoot&) = delete;
-    ConfigRoot& operator=(const ConfigRoot&) = delete;
-
-    const node_type& getNode() const { return node; }
-
-private:
-    void parse(const std::vector<std::string>& contents);
-
-    Separator separator;
-    node_type node;
-};
-
-} //namespace detail
 
 struct Config
 {
-    typedef detail::ConfigRoot::Separator separator_type;
-    typedef detail::ConfigRoot::node_type node_type;
+    typedef ConfigBuilder::Separator separator_type;
+    typedef ConfigBuilder::node_type node_type;
 
     explicit Config(const std::vector<std::string>& aFileList, const separator_type& aSeparator = separator_type())
-        : root(new detail::ConfigRoot(aFileList, aSeparator))
+        : root(new ConfigBuilder(aFileList, aSeparator))
         , separator(aSeparator)
         , node(&root->getNode())
     {
@@ -139,7 +101,7 @@ struct Config
     }
 
 private:
-    Config(std::shared_ptr<detail::ConfigRoot> aConfigRoot
+    Config(std::shared_ptr<ConfigBuilder> aConfigRoot
          , const node_type* aNode
          , const separator_type& aSeparator)
         : root(aConfigRoot)
@@ -147,7 +109,7 @@ private:
         , node(aNode)
     {}
 
-    std::shared_ptr<detail::ConfigRoot> root;
+    std::shared_ptr<ConfigBuilder> root;
     separator_type separator;
     const node_type* node;
 };

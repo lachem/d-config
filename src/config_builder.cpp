@@ -26,17 +26,16 @@
 #include <utility>
 
 namespace dconfig {
-namespace detail {
 
 // --------------------------------------------------------------------------------
-std::shared_ptr<Node> buildCustomTree(const boost::property_tree::ptree& source)
+std::shared_ptr<ConfigBuilder::node_type> buildCustomTree(const boost::property_tree::ptree& source)
 {
-    using element_type = std::pair<const boost::property_tree::ptree*, std::shared_ptr<Node>>;
+    using element_type = std::pair<const boost::property_tree::ptree*, std::shared_ptr<ConfigBuilder::node_type>>;
 
     std::queue<element_type> queue;
     std::queue<element_type> next;
 
-    auto result = std::make_shared<Node>();
+    auto result = std::make_shared<ConfigBuilder::node_type>();
     queue.push(std::make_pair(&source, result));
     while (!queue.empty())
     {
@@ -45,7 +44,7 @@ std::shared_ptr<Node> buildCustomTree(const boost::property_tree::ptree& source)
             auto&& key = node.first;
             if (!node.second.empty())
             {
-                auto&& insert = std::make_shared<Node>();
+                auto&& insert = std::make_shared<ConfigBuilder::node_type>();
                 queue.front().second->setNode(key, insert);
                 next.push(std::make_pair(&node.second, insert));
             }
@@ -100,7 +99,7 @@ boost::property_tree::ptree buildPropertyTree(const std::string& contents)
 }
 
 // --------------------------------------------------------------------------------
-void ConfigRoot::parse(const std::vector<std::string>& contents)
+void ConfigBuilder::parse(const std::vector<std::string>& contents)
 {
     for(auto&& config : contents)
     {
@@ -119,5 +118,5 @@ void ConfigRoot::parse(const std::vector<std::string>& contents)
     }
 }
 
-} //namespace detail
 } //namespace dconfig
+

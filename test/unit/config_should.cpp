@@ -8,6 +8,7 @@
 
 //config
 #include <config.hpp>
+#include <config_builder.hpp>
 #include <init_factory.hpp>
 #include <file_factory.hpp>
 
@@ -62,7 +63,7 @@ struct TextConfigLoader
         files.push_back(loadFile(std::string("test/config_override.") + Extension::name()));
         files.push_back(loadFile(std::string("test/array.json")));
 
-        config.reset(new ::dconfig::Config(files, separator));
+        config.reset(new ::dconfig::Config(::dconfig::ConfigBuilder(files, separator).build()));
     }
 
     std::string loadFile(const std::string& filename)

@@ -3,6 +3,7 @@
 
 //config
 #include <config.hpp>
+#include <config_builder.hpp>
 
 //std
 #include <fstream>
@@ -35,7 +36,8 @@ struct Performance : ::testing::Test
         for (auto i = 0; i<repetitions; ++i)
         {
             asm("");
-            func();
+            auto result = func();
+            keepalive = &result;
             asm("");
         }
         auto end = high_resolution_clock::now();
@@ -51,11 +53,12 @@ struct Performance : ::testing::Test
 
     ::dconfig::Config build(const ::dconfig::Separator& separator = '.')
     {
-        return ::dconfig::Config(files, separator);
+        return ::dconfig::ConfigBuilder(files, separator).build();
     }
 
 private:
     std::vector<std::string> files;
+    void* keepalive;
 };
 
 TEST_F(Performance, withMultilevelScoping)
@@ -64,7 +67,7 @@ TEST_F(Performance, withMultilevelScoping)
 
     auto config = this->build();
     this->measure(
-        [&config](){auto scope = config.scope("ConfigShould.System");},
+        [&config](){return config.scope("ConfigShould.System");},
         100000);
 }
 
@@ -74,7 +77,7 @@ TEST_F(Performance, withCrossLevelValueRetrieval)
 
     auto config = this->build();
     this->measure(
-        [&config](){auto value = config.get<std::string>("ConfigShould.System.SessionFile");},
+        [&config](){return config.get<std::string>("ConfigShould.System.SessionFile");},
         100000);
 }
 
@@ -84,7 +87,7 @@ TEST_F(Performance, withCrossLevelIntegerRetrieval)
 
     auto config = this->build();
     this->measure(
-        [&config](){auto value = config.get<int>("ConfigShould.System.SessionInstance");},
+        [&config](){return config.get<int>("ConfigShould.System.SessionInstance");},
         100000);
 }
 
@@ -98,7 +101,7 @@ TEST_P(PerformanceParameterized, withReplacing)
     this->load(std::string("test/config.") + GetParam());
 
     this->measure(
-        [this](){auto config = this->build();},
+        [this](){return this->build();},
         10000, std::string(GetParam()) + " file");
 }
 
@@ -108,7 +111,7 @@ TEST_P(PerformanceParameterized, withMergingAndReplacing)
     this->load(std::string("test/config_override.") + GetParam());
 
     this->measure(
-        [this](){auto config = this->build();},
+        [this](){return this->build();},
         10000, std::string(GetParam()) + " file");
 }
 

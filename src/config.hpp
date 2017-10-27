@@ -7,7 +7,6 @@
 //local
 #include <node.hpp>
 #include <separator.hpp>
-#include <config_builder.hpp>
 
 //boost
 #include <boost/lexical_cast.hpp>
@@ -19,17 +18,9 @@
 
 namespace dconfig {
 
-struct Config
+class Config
 {
-    using node_type = ConfigBuilder::node_type;
-
-    explicit Config(const std::vector<std::string>& aFileList, const Separator& aSeparator = '.')
-        : root(new ConfigBuilder(aFileList, aSeparator))
-        , separator(aSeparator)
-        , node(&root->getNode())
-    {
-    }
-
+public:
     template<typename T>
     boost::optional<T> get(const std::string& path) const
     {
@@ -75,10 +66,10 @@ struct Config
             const auto& nodes = node->getNodes(path, separator);
             if (!nodes.empty())
             {
-                return Config(root, nodes[0].get(), separator);
+                return Config(nodes[0], separator);
             }
         }
-        return Config(root, nullptr, separator);
+        return Config(nullptr, separator);
     }
 
     std::vector<Config> scopes(const std::string& path) const
@@ -89,7 +80,7 @@ struct Config
             const auto& nodes = node->getNodes(path, separator);
             for (const auto& sub : nodes)
             {
-                result.emplace_back(Config(root, sub.get(), separator));
+                result.emplace_back(Config(sub, separator));
             }
         }
         return result;
@@ -97,21 +88,20 @@ struct Config
 
     explicit operator bool() const noexcept
     {
-        return node;
+        return static_cast<bool>(node);
     }
 
 private:
-    Config(std::shared_ptr<ConfigBuilder> aConfigRoot
-         , const node_type* aNode
-         , const Separator& aSeparator)
-        : root(aConfigRoot)
-        , separator(aSeparator)
-        , node(aNode)
-    {}
+    friend class ConfigBuilder;
 
-    std::shared_ptr<ConfigBuilder> root;
+    Config(const detail::Node::node_type& aNode, const Separator& aSeparator)
+        : separator(aSeparator)
+        , node(aNode)
+    {
+    }
+
     Separator separator;
-    const node_type* node;
+    detail::Node::node_type node;
 };
 
 template<>

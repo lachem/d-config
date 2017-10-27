@@ -6,6 +6,7 @@
 
 //local
 #include <node.hpp>
+#include <config.hpp>
 
 //boost
 #include <boost/lexical_cast.hpp>
@@ -20,7 +21,7 @@ namespace dconfig {
 // TODO: Add parameters for prebuild and postbuild expanders (executed in provided sequence)
 struct ConfigBuilder
 {
-    using node_type = detail::Node;
+    using node_type = detail::Node::node_type;
 
     explicit ConfigBuilder(const std::vector<std::string>& aContents, Separator aSeparator = '.')
         : separator(aSeparator)
@@ -32,7 +33,7 @@ struct ConfigBuilder
     ConfigBuilder(const ConfigBuilder&) = delete;
     ConfigBuilder& operator=(const ConfigBuilder&) = delete;
 
-    const node_type& getNode() const { return node; }
+    Config build() const { return Config(node, separator); }
 
 private:
     void parse(const std::vector<std::string>& contents);

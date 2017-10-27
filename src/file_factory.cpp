@@ -4,13 +4,19 @@
 //          http://www.boost.org/LICENSE_1_0.txt)
 
 //local
-#include "file_factory.hpp"
+#include <file_factory.hpp>
+#include <config_builder.hpp>
 
 //std
 #include <fstream>
 
-namespace dconfig
+namespace dconfig {
+
+Config FileFactory::create() const
 {
+    ConfigBuilder builder(readFiles(files), separator);
+    return builder.build();
+}
 
 std::vector<std::string> FileFactory::readFiles(const std::vector<std::string>& files) const
 {

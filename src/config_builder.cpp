@@ -6,6 +6,7 @@
 //local
 #include "node.hpp"
 #include "config.hpp"
+#include "config_builder.hpp"
 #include "env_var_expander.hpp"
 #include "config_param_expander.hpp"
 #include "config_node_expander.hpp"
@@ -28,14 +29,14 @@
 namespace dconfig {
 
 // --------------------------------------------------------------------------------
-std::shared_ptr<ConfigBuilder::node_type> buildCustomTree(const boost::property_tree::ptree& source)
+ConfigBuilder::node_type buildCustomTree(const boost::property_tree::ptree& source)
 {
-    using element_type = std::pair<const boost::property_tree::ptree*, std::shared_ptr<ConfigBuilder::node_type>>;
+    using element_type = std::pair<const boost::property_tree::ptree*, std::shared_ptr<detail::Node>>;
 
     std::queue<element_type> queue;
     std::queue<element_type> next;
 
-    auto result = std::make_shared<ConfigBuilder::node_type>();
+    auto result = std::make_shared<detail::Node>();
     queue.push(std::make_pair(&source, result));
     while (!queue.empty())
     {
@@ -44,7 +45,7 @@ std::shared_ptr<ConfigBuilder::node_type> buildCustomTree(const boost::property_
             auto&& key = node.first;
             if (!node.second.empty())
             {
-                auto&& insert = std::make_shared<ConfigBuilder::node_type>();
+                auto&& insert = std::make_shared<detail::Node>();
                 queue.front().second->setNode(key, insert);
                 next.push(std::make_pair(&node.second, insert));
             }
@@ -108,13 +109,20 @@ void ConfigBuilder::parse(const std::vector<std::string>& contents)
 
         boost::trim(expanded);
         auto mergeFrom = buildCustomTree(buildPropertyTree(expanded));
-        node.overwrite(std::move(*mergeFrom));
+        if (!node)
+        {
+            node = mergeFrom;
+        }
+        else
+        {
+            node->overwrite(std::move(*mergeFrom));
+        }
     }
 
-    if(!node.empty())
+    if(node && !node->empty())
     {
-        ConfigParamExpander(separator).operator()(node);
-        ConfigNodeExpander(separator).operator()(node);
+        ConfigParamExpander(separator).operator()(*node);
+        ConfigNodeExpander(separator).operator()(*node);
     }
 }
 

@@ -25,10 +25,7 @@ struct FileFactory
     {
     }
 
-    Config create() const
-    {
-        return Config(readFiles(files), separator);
-    }
+    Config create() const;
 
 private:
     std::vector<std::string> readFiles(const std::vector<std::string>& files) const;

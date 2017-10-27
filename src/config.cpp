@@ -101,7 +101,7 @@ boost::property_tree::ptree buildPropertyTree(const std::string& contents)
 
 // --------------------------------------------------------------------------------
 void ConfigRoot::parse(const std::vector<std::string>& contents)
-{    
+{
     for(auto&& config : contents)
     {
         auto expanded = config;
@@ -111,12 +111,12 @@ void ConfigRoot::parse(const std::vector<std::string>& contents)
         auto mergeFrom = buildCustomTree(buildPropertyTree(expanded));
         node.overwrite(std::move(*mergeFrom));
     }
-    
+
     if(!node.empty())
     {
         ConfigParamExpander()(node);
         ConfigNodeExpander()(node);
-    }    
+    }
 }
 
 } //namespace detail

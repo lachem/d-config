@@ -18,6 +18,8 @@
 namespace dconfig {
 namespace detail {
 
+// TODO: ConfigRoot is now a builder and should be moved to separate compilation unit
+// TODO: Add parameters for prebuild and postbuild expanders (executed in provided sequence)
 struct ConfigRoot
 {
     struct Separator

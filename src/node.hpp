@@ -32,6 +32,9 @@
 namespace dconfig {
 namespace detail {
 
+
+// TODO: Add an abstract interface to prevent from pulling in
+//       boost::multi_index to every compilation unit of the user
 class Node
 {
     struct sequenced {};
@@ -45,7 +48,7 @@ public:
     using value_list = std::vector<value_type>;
     using node_list  = std::vector<node_type>;
 
-    //TODO: For optimization reasons we might want to extend the variant with single value
+    //TODO: Consider - for optimization reasons we might want to extend the variant with single value
     using node_value_list = boost::variant<node_list, value_list>;
 
     struct ElementType

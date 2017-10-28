@@ -22,12 +22,12 @@ class ConfigNodeExpander
     {
         std::string   of;
         std::string   with;
-        detail::Node* at;
+        detail::ConfigNode* at;
     };
 
     struct Visitor
     {
-        explicit Visitor(detail::Node* root, const boost::xpressive::sregex* match, std::vector<Replacement>* result)
+        explicit Visitor(detail::ConfigNode* root, const boost::xpressive::sregex* match, std::vector<Replacement>* result)
             : root(root)
             , match(match)
             , result(result)
@@ -37,7 +37,7 @@ class ConfigNodeExpander
             assert(result);
         }
 
-        void visit(detail::Node& parent, const std::string& key, std::string& value)
+        void visit(detail::ConfigNode& parent, const std::string& key, std::string& value)
         {
             using namespace boost::xpressive;
 
@@ -49,12 +49,12 @@ class ConfigNodeExpander
             }
         }
 
-        void visit(detail::Node&, const std::string&, detail::Node& node)
+        void visit(detail::ConfigNode&, const std::string&, detail::ConfigNode& node)
         {
             node.accept(*this);
         }
 
-        detail::Node* root;
+        detail::ConfigNode* root;
         const boost::xpressive::sregex* match;
         std::vector<Replacement>* result;
     };
@@ -65,7 +65,7 @@ public:
     {
     }
 
-    void operator()(detail::Node& root)
+    void operator()(detail::ConfigNode& root)
     {
         using namespace boost::xpressive;
 

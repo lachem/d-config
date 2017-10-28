@@ -4,7 +4,7 @@
 //          http://www.boost.org/LICENSE_1_0.txt)
 
 //local
-#include <node.hpp>
+#include <config_node.hpp>
 #include <separator.hpp>
 
 //boost
@@ -21,7 +21,7 @@ class ConfigParamExpander
 {
     struct RegexExpander
     {
-        RegexExpander(const detail::Node* node, const Separator& aSeparator)
+        RegexExpander(const detail::ConfigNode* node, const Separator& aSeparator)
             : node(node)
             , separator(aSeparator)
         {
@@ -41,32 +41,32 @@ class ConfigParamExpander
             return empty;
         }
 
-        const detail::Node* node;
+        const detail::ConfigNode* node;
         Separator separator;
     };
 
     struct Visitor
     {
-        Visitor(detail::Node* root, const boost::xpressive::sregex* match, const Separator& aSeparator)
+        Visitor(detail::ConfigNode* root, const boost::xpressive::sregex* match, const Separator& aSeparator)
             : match(match)
             , root(root)
             , separator(aSeparator)
         {
         }
 
-        void visit(detail::Node&, const std::string&, std::string& value)
+        void visit(detail::ConfigNode&, const std::string&, std::string& value)
         {
             using namespace boost::xpressive;
             value = regex_replace(value, *match, RegexExpander(root, separator));
         }
 
-        void visit(detail::Node&, const std::string&, detail::Node& node)
+        void visit(detail::ConfigNode&, const std::string&, detail::ConfigNode& node)
         {
             node.accept(*this);
         }
 
         const boost::xpressive::sregex* match;
-        detail::Node* root;
+        detail::ConfigNode* root;
         Separator separator;
     };
 
@@ -76,7 +76,7 @@ public:
     {
     }
 
-    void operator()(detail::Node& root)
+    void operator()(detail::ConfigNode& root)
     {
         using namespace boost::xpressive;
 

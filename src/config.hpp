@@ -5,7 +5,7 @@
 #pragma once
 
 //local
-#include <node.hpp>
+#include <config_node.hpp>
 #include <separator.hpp>
 
 //boost
@@ -94,14 +94,14 @@ public:
 private:
     friend class ConfigBuilder;
 
-    Config(const detail::Node::node_type& aNode, const Separator& aSeparator)
+    Config(const detail::ConfigNode::node_type& aNode, const Separator& aSeparator)
         : separator(aSeparator)
         , node(aNode)
     {
     }
 
     Separator separator;
-    detail::Node::node_type node;
+    detail::ConfigNode::node_type node;
 };
 
 template<>

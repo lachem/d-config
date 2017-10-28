@@ -33,7 +33,7 @@
 namespace dconfig {
 namespace detail {
 
-class Node
+class ConfigNode
 {
     struct sequenced {};
     struct ordered {};
@@ -41,7 +41,7 @@ class Node
 
 public:
     using value_type = std::string;
-    using node_type  = std::shared_ptr<Node>;
+    using node_type  = std::shared_ptr<ConfigNode>;
 
     using value_list = std::vector<value_type>;
     using node_list  = std::vector<node_type>;
@@ -83,7 +83,7 @@ public:
     using const_iterator = decltype(std::declval<children_container>().get<sequenced>().cbegin());
 
     template<typename S>
-    friend S& operator << (S&& stream, const Node& node)
+    friend S& operator << (S&& stream, const ConfigNode& node)
     {
         node.print(stream, "");
 
@@ -252,7 +252,7 @@ public:
     {
         for(auto&& child : *this)
         {
-            if (auto&& elem = boost::get<detail::Node::value_list>(&child.value))
+            if (auto&& elem = boost::get<value_list>(&child.value))
             {
                 for (auto&& value : *elem)
                 {
@@ -261,7 +261,7 @@ public:
                 }
             }
             else
-            if (auto&& elem = boost::get<detail::Node::node_list>(&child.value))
+            if (auto&& elem = boost::get<node_list>(&child.value))
             {
                 for (auto&& node : *elem)
                 {
@@ -300,7 +300,7 @@ public:
     {
         return children.get<sequenced>().end();
     }
-    void overwrite(Node&& other);
+    void overwrite(ConfigNode&& other);
 
 private:
     template<typename S>

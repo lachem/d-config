@@ -4,7 +4,7 @@
 //          http://www.boost.org/LICENSE_1_0.txt)
 
 //local
-#include <node.hpp>
+#include <config_node.hpp>
 #include <config.hpp>
 #include <config_builder.hpp>
 #include <env_var_expander.hpp>
@@ -31,12 +31,12 @@ namespace dconfig {
 // --------------------------------------------------------------------------------
 ConfigBuilder::node_type buildCustomTree(const boost::property_tree::ptree& source)
 {
-    using element_type = std::pair<const boost::property_tree::ptree*, std::shared_ptr<detail::Node>>;
+    using element_type = std::pair<const boost::property_tree::ptree*, std::shared_ptr<detail::ConfigNode>>;
 
     std::queue<element_type> queue;
     std::queue<element_type> next;
 
-    auto result = std::make_shared<detail::Node>();
+    auto result = std::make_shared<detail::ConfigNode>();
     queue.push(std::make_pair(&source, result));
     while (!queue.empty())
     {
@@ -45,7 +45,7 @@ ConfigBuilder::node_type buildCustomTree(const boost::property_tree::ptree& sour
             auto&& key = node.first;
             if (!node.second.empty())
             {
-                auto&& insert = std::make_shared<detail::Node>();
+                auto&& insert = std::make_shared<detail::ConfigNode>();
                 queue.front().second->setNode(key, insert);
                 next.push(std::make_pair(&node.second, insert));
             }

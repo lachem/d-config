@@ -8,4 +8,4 @@ Makefile
 
 .kdev4/*
 dconfig.kdev4
-build.log
+*.log

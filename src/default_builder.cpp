@@ -4,7 +4,7 @@
 //          http://www.boost.org/LICENSE_1_0.txt)
 
 //local
-#include <node.hpp>
+#include <config_node.hpp>
 #include <default_builder.hpp>
 #include <config_builder.hpp>
 #include <env_var_expander.hpp>
@@ -24,8 +24,8 @@ Config DefaultBuilder::build(std::vector<std::string>&& contents) const
     auto sep = separator;
     ConfigBuilder builder(
         [](std::string& content) { EnvVarExpander().operator()(content); },
-        [sep](detail::Node& node) { ConfigParamExpander(sep).operator()(node); },
-        [sep](detail::Node& node) { ConfigNodeExpander(sep).operator()(node); }, 
+        [sep](detail::ConfigNode& node) { ConfigParamExpander(sep).operator()(node); },
+        [sep](detail::ConfigNode& node) { ConfigNodeExpander(sep).operator()(node); }, 
         separator);
     return builder.build(std::move(contents));
 }

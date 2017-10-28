@@ -5,7 +5,7 @@
 #pragma once
 
 //local
-#include <node.hpp>
+#include <config_node.hpp>
 #include <config.hpp>
 
 //boost
@@ -20,9 +20,9 @@ namespace dconfig {
 
 struct ConfigBuilder
 {
-    using node_type = detail::Node::node_type;
+    using node_type = detail::ConfigNode::node_type;
     using prebuild_expander_type = std::function<void (std::string&)>;
-    using postbuild_expander_type = std::function<void (detail::Node&)>;
+    using postbuild_expander_type = std::function<void (detail::ConfigNode&)>;
 
     template<typename... T>
     explicit ConfigBuilder(T&&... params)

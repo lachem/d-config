@@ -3,16 +3,16 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#include <node.hpp>
+#include <config_node.hpp>
 
 namespace dconfig {
 namespace detail {
 
-void Node::overwrite(Node&& other) 
+void ConfigNode::overwrite(ConfigNode&& other)
 {
     auto currMergeTo = this->children.get<ordered>().begin();
     auto endMergeTo  = this->children.get<ordered>().end();
-    
+
     auto currMergeFrom = other.children.get<ordered>().begin();
     auto endMergeFrom  = other.children.get<ordered>().end();
 
@@ -27,7 +27,7 @@ void Node::overwrite(Node&& other)
         {
             currMergeTo = this->children.insert(currMergeTo, {currMergeFrom->key, currMergeFrom->value});
             ++currMergeTo;
-            ++currMergeFrom;                
+            ++currMergeFrom;
         }
         else
         if(currMergeTo->key == currMergeFrom->key)
@@ -48,10 +48,10 @@ void Node::overwrite(Node&& other)
                 }
             }
             else
-            {   
+            {
                 //NOTE: const_cast is safe here as we are not touching the key
-                const_cast<node_value_list&>(currMergeTo->value) = 
-                    std::move(const_cast<node_value_list&>(currMergeFrom->value));                    
+                const_cast<node_value_list&>(currMergeTo->value) =
+                    std::move(const_cast<node_value_list&>(currMergeFrom->value));
             }
             ++currMergeFrom;
             ++currMergeTo;
@@ -62,10 +62,10 @@ void Node::overwrite(Node&& other)
             ++currMergeTo;
         }
     }
-    
+
     for(;currMergeFrom != endMergeFrom; ++currMergeFrom)
     {
-        this->children.insert({currMergeFrom->key, currMergeFrom->value});            
+        this->children.insert({currMergeFrom->key, currMergeFrom->value});
     }
 }
 

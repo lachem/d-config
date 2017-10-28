@@ -22,7 +22,7 @@ Config FileFactory::create() const
             std::istreambuf_iterator<char>(fileStream),
             std::istreambuf_iterator<char>())
         );
-    }    
+    }
     return DefaultBuilder(separator).build(std::move(contents));
 }
 

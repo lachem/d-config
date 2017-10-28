@@ -20,7 +20,7 @@ struct FileFactory
 {
     template<typename T>
     explicit FileFactory(T&& aFileList, const Separator& aSeparator = Separator())
-        : files(aFileList)
+        : files(std::forward<T>(aFileList))
         , separator(aSeparator)
     {
     }

@@ -5,11 +5,8 @@
 #pragma once
 
 //local
-#include <config_node.hpp>
 #include <config.hpp>
-
-//boost
-#include <boost/mpl/assert.hpp>
+#include <config_node.hpp>
 
 //std
 #include <memory>
@@ -25,9 +22,9 @@ struct ConfigBuilder
     using postbuild_expander_type = std::function<void (detail::ConfigNode&)>;
 
     template<typename... T>
-    explicit ConfigBuilder(T&&... params)
+    explicit ConfigBuilder(T&&... aParams)
     {
-        segregate(std::forward<T>(params)...);
+        segregate(std::forward<T>(aParams)...);
     }
 
     ConfigBuilder() = delete;
@@ -65,7 +62,7 @@ private:
     {
         this->separator = separator;
     }
-    
+
     void segregate()
     {
         //empty

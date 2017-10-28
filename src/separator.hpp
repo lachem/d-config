@@ -8,8 +8,9 @@ namespace dconfig {
 
 struct Separator
 {
-    Separator(char val) : value(val) {}
     Separator() = default;
+    explicit Separator(char aValue) : value(aValue) {}
+
     operator char () const { return value; }
     char value = '.';
 };

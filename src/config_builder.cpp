@@ -4,12 +4,9 @@
 //          http://www.boost.org/LICENSE_1_0.txt)
 
 //local
-#include <config_node.hpp>
 #include <config.hpp>
+#include <config_node.hpp>
 #include <config_builder.hpp>
-#include <env_var_expander.hpp>
-#include <config_param_expander.hpp>
-#include <config_node_expander.hpp>
 
 //boost
 #include <boost/algorithm/string/predicate.hpp>

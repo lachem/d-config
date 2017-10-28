@@ -38,7 +38,7 @@ public:
 
         sregex env = "%env." >> (s1 = -+_) >> "%";
         auto it = regex_replace(contents.begin(), contents.begin(), contents.end(), env, RegexExpander());
-        
+
         //clear out the spare part of the string to avoid reallaoc inside contents
         for (; it != contents.end(); ++it)
         {

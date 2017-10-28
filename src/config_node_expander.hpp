@@ -20,8 +20,8 @@ class ConfigNodeExpander
 {
     struct Replacement
     {
-        std::string   of;
-        std::string   with;
+        std::string of;
+        std::string with;
         detail::ConfigNode* at;
     };
 

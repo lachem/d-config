@@ -13,8 +13,7 @@
 #include <boost/optional.hpp>
 
 //std
-#include <map>
-#include <memory>
+#include <vector>
 
 namespace dconfig {
 

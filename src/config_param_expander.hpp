@@ -47,9 +47,9 @@ class ConfigParamExpander
 
     struct Visitor
     {
-        Visitor(detail::ConfigNode* root, const boost::xpressive::sregex* match, const Separator& aSeparator)
-            : match(match)
-            , root(root)
+        Visitor(detail::ConfigNode* aRoot, const boost::xpressive::sregex* aMatch, const Separator& aSeparator)
+            : match(aMatch)
+            , root(aRoot)
             , separator(aSeparator)
         {
         }

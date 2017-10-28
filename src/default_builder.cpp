@@ -5,8 +5,8 @@
 
 //local
 #include <config_node.hpp>
-#include <default_builder.hpp>
 #include <config_builder.hpp>
+#include <default_builder.hpp>
 #include <env_var_expander.hpp>
 #include <config_param_expander.hpp>
 #include <config_node_expander.hpp>
@@ -25,7 +25,7 @@ Config DefaultBuilder::build(std::vector<std::string>&& contents) const
     ConfigBuilder builder(
         [](std::string& content) { EnvVarExpander().operator()(content); },
         [sep](detail::ConfigNode& node) { ConfigParamExpander(sep).operator()(node); },
-        [sep](detail::ConfigNode& node) { ConfigNodeExpander(sep).operator()(node); }, 
+        [sep](detail::ConfigNode& node) { ConfigNodeExpander(sep).operator()(node); },
         separator);
     return builder.build(std::move(contents));
 }

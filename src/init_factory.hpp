@@ -9,6 +9,10 @@
 #include <config.hpp>
 #include <file_factory.hpp>
 
+//std
+#include <string>
+#include <vector>
+
 namespace dconfig {
 
 struct InitFactory

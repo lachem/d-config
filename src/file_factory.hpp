@@ -19,7 +19,7 @@ namespace dconfig
 struct FileFactory
 {
     template<typename T>
-    explicit FileFactory(T&& aFileList, const Separator& aSeparator = '.')
+    explicit FileFactory(T&& aFileList, const Separator& aSeparator = Separator())
         : files(aFileList)
         , separator(aSeparator)
     {
@@ -27,7 +27,7 @@ struct FileFactory
 
     Config create() const;
 
-private:   
+private:
     std::vector<std::string> files;
     Separator separator;
 };

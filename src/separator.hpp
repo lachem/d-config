@@ -6,6 +6,12 @@
 
 namespace dconfig {
 
-using Separator = char;
+struct Separator
+{
+    Separator(char val) : value(val) {}
+    Separator() = default;
+    operator char () const { return value; }
+    char value = '.';
+};
 
 } //namespace dconfig

@@ -15,7 +15,7 @@ namespace dconfig {
 
 struct DefaultBuilder
 {
-    explicit DefaultBuilder(Separator aSeparator = '.')
+    explicit DefaultBuilder(Separator aSeparator = Separator())
         : separator(aSeparator)
     {
     }

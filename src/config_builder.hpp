@@ -26,7 +26,6 @@ struct ConfigBuilder
 
     template<typename... T>
     explicit ConfigBuilder(T&&... params)
-        : separator('.')
     {
         segregate(std::forward<T>(params)...);
     }

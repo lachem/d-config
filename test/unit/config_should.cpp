@@ -34,7 +34,7 @@ struct JsonExtension
 template<typename Extension>
 struct InitConfigLoader
 {
-    void loadConfig(const ::dconfig::Separator& separator = '.')
+    void loadConfig(const ::dconfig::Separator& separator = ::dconfig::Separator())
     {
         auto configFile         = std::string("test/config.") + Extension::name();
         auto configFileOverride = std::string("test/config_override.") + Extension::name();
@@ -56,7 +56,7 @@ struct InitConfigLoader
 template<typename Extension>
 struct TextConfigLoader
 {
-    void loadConfig(const ::dconfig::Separator& separator = '.')
+    void loadConfig(const ::dconfig::Separator& separator = ::dconfig::Separator())
     {
         std::vector<std::string> files;
         files.push_back(loadFile(std::string("test/config.") + Extension::name()));
@@ -80,7 +80,7 @@ struct TextConfigLoader
 template<typename Extension>
 struct FileConfigLoader
 {
-    void loadConfig(const ::dconfig::Separator& separator = '.')
+    void loadConfig(const ::dconfig::Separator& separator = ::dconfig::Separator())
     {
         std::vector<std::string> files;
         files.push_back(std::string("test/config.") + Extension::name());

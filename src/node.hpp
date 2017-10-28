@@ -5,6 +5,9 @@
 
 #pragma once
 
+//local
+#include <separator.hpp>
+
 //boost
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/sequenced_index.hpp>
@@ -27,14 +30,9 @@
 #include <functional>
 #include <cstring>
 
-#include <iostream>
-
 namespace dconfig {
 namespace detail {
 
-
-// TODO: Add an abstract interface to prevent from pulling in
-//       boost::multi_index to every compilation unit of the user
 class Node
 {
     struct sequenced {};
@@ -172,7 +170,7 @@ public:
         return noValues();
     }
 
-    const value_list& getValues(const char* key, char separator) const
+    const value_list& getValues(const char* key, Separator separator) const
     {
         if (key)
         {
@@ -193,7 +191,7 @@ public:
         return noValues();
     }
 
-    const value_list& getValues(const std::string& key, char separator) const
+    const value_list& getValues(const std::string& key, Separator separator) const
     {
         return this->getValues(key.c_str(), separator);
     }
@@ -223,7 +221,7 @@ public:
         return noNodes();
     }
 
-    const node_list& getNodes(const char* key, char separator) const
+    const node_list& getNodes(const char* key, Separator separator) const
     {
         if (key)
         {
@@ -244,7 +242,7 @@ public:
         return noNodes();
     }
 
-    const node_list& getNodes(const std::string& key, char separator) const
+    const node_list& getNodes(const std::string& key, Separator separator) const
     {
         return getNodes(key.c_str(), separator);
     }

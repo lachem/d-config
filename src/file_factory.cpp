@@ -5,7 +5,7 @@
 
 //local
 #include <file_factory.hpp>
-#include <config_builder.hpp>
+#include <default_builder.hpp>
 
 //std
 #include <fstream>
@@ -14,22 +14,16 @@ namespace dconfig {
 
 Config FileFactory::create() const
 {
-    ConfigBuilder builder(readFiles(files), separator);
-    return builder.build();
-}
-
-std::vector<std::string> FileFactory::readFiles(const std::vector<std::string>& files) const
-{
     std::vector<std::string> contents;
     for(auto&& filename : files)
     {
         std::ifstream fileStream(filename);
-        contents.push_back(std::string(
+        contents.emplace_back(std::string(
             std::istreambuf_iterator<char>(fileStream),
             std::istreambuf_iterator<char>())
         );
-    }
-    return std::move(contents);
+    }    
+    return DefaultBuilder(separator).build(std::move(contents));
 }
 
 } //namespace dconfig

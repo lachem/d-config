@@ -19,22 +19,31 @@ namespace dconfig {
 /// Fulfills prebuild expander conept
 struct EnvVarExpander
 {
-    explicit EnvVarExpander(const Separator&) {}
+private:
+    struct RegexExpander
+    {
+        std::string operator()(const boost::xpressive::smatch& what) const
+        {
+            assert(what.size()>1);
 
+            const char* env = getenv((++what.begin())->str().c_str());
+            return env ? env : what.str();
+        }
+    };
+
+public:
     void operator()(std::string& contents) const
     {
         using namespace boost::xpressive;
 
         sregex env = "%env." >> (s1 = -+_) >> "%";
-        contents = std::move(regex_replace(contents, env, *this));
-    }
-
-    std::string operator()(const boost::xpressive::smatch& what) const
-    {
-        assert(what.size()>1);
-
-        const char* env = getenv((++what.begin())->str().c_str());
-        return env ? env : what.str();
+        auto it = regex_replace(contents.begin(), contents.begin(), contents.end(), env, RegexExpander());
+        
+        //clear out the spare part of the string to avoid reallaoc inside contents
+        for (; it != contents.end(); ++it)
+        {
+            *it = ' ';
+        }
     }
 };
 

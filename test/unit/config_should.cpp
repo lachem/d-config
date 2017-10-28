@@ -8,7 +8,7 @@
 
 //config
 #include <config.hpp>
-#include <config_builder.hpp>
+#include <default_builder.hpp>
 #include <init_factory.hpp>
 #include <file_factory.hpp>
 
@@ -63,7 +63,7 @@ struct TextConfigLoader
         files.push_back(loadFile(std::string("test/config_override.") + Extension::name()));
         files.push_back(loadFile(std::string("test/array.json")));
 
-        config.reset(new ::dconfig::Config(::dconfig::ConfigBuilder(files, separator).build()));
+        config.reset(new ::dconfig::Config(::dconfig::DefaultBuilder(separator).build(std::move(files))));
     }
 
     std::string loadFile(const std::string& filename)
@@ -87,8 +87,7 @@ struct FileConfigLoader
         files.push_back(std::string("test/config_override.") + Extension::name());
         files.push_back(std::string("test/array.json"));
 
-        config.reset(new ::dconfig::Config(
-                    ::dconfig::FileFactory(files, separator).create()));
+        config.reset(new ::dconfig::Config(::dconfig::FileFactory(files, separator).create()));
     }
 
     std::shared_ptr<::dconfig::Config> config;
@@ -229,6 +228,24 @@ TYPED_TEST(ConfigShould, supportArraysJsonArrays)
     EXPECT_EQ(std::string("Elem1"),values[0]);
     EXPECT_EQ(std::string("Elem2"),values[1]);
     EXPECT_EQ(std::string("Elem3"),values[2]);
+}
+
+TYPED_TEST(ConfigShould, supportArrayInjection)
+{
+    this->loadConfig();
+
+    auto&& scopes = this->config->scopes("InjectedArray.");
+
+    for (const auto& scope : scopes)
+    {
+        auto&& values = scope.template getAll<std::string>("Array.");
+
+        ASSERT_EQ(3, values.size());
+
+        EXPECT_EQ(std::string("Elem1"),values[0]);
+        EXPECT_EQ(std::string("Elem2"),values[1]);
+        EXPECT_EQ(std::string("Elem3"),values[2]);
+    }
 }
 
 TYPED_TEST(ConfigShould, supportArraysByRef)

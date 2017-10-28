@@ -9,37 +9,72 @@
 #include <config.hpp>
 
 //boost
-#include <boost/lexical_cast.hpp>
-#include <boost/optional.hpp>
+#include <boost/mpl/assert.hpp>
 
 //std
-#include <map>
 #include <memory>
+#include <functional>
+#include <vector>
 
 namespace dconfig {
 
-// TODO: Add parameters for prebuild and postbuild expanders (executed in provided sequence)
 struct ConfigBuilder
 {
     using node_type = detail::Node::node_type;
+    using prebuild_expander_type = std::function<void (std::string&)>;
+    using postbuild_expander_type = std::function<void (detail::Node&)>;
 
-    explicit ConfigBuilder(const std::vector<std::string>& aContents, Separator aSeparator = '.')
-        : separator(aSeparator)
+    template<typename... T>
+    explicit ConfigBuilder(T&&... params)
+        : separator('.')
     {
-        parse(aContents);
+        segregate(std::forward<T>(params)...);
     }
 
+    ConfigBuilder() = delete;
     ConfigBuilder(ConfigBuilder&&) = delete;
     ConfigBuilder(const ConfigBuilder&) = delete;
     ConfigBuilder& operator=(const ConfigBuilder&) = delete;
 
-    Config build() const { return Config(node, separator); }
+    Config build(std::vector<std::string>&& contents)
+    {
+        return Config(parse(std::move(contents)), separator);
+    }
 
 private:
-    void parse(const std::vector<std::string>& contents);
+    node_type parse(std::vector<std::string>&& contents);
 
+    template<typename T1, typename T2, typename... T>
+    void segregate(T1&& p1, T2&& p2, T&&... params)
+    {
+        segregate(std::forward<T1>(p1));
+        segregate(std::forward<T2>(p2));
+        segregate(std::forward<T >(params)...);
+    }
+
+    void segregate(const prebuild_expander_type& pre)
+    {
+        preexpand.push_back(pre);
+    }
+
+    void segregate(const postbuild_expander_type& post)
+    {
+        postexpand.push_back(post);
+    }
+
+    void segregate(const Separator& separator)
+    {
+        this->separator = separator;
+    }
+    
+    void segregate()
+    {
+        //empty
+    }
+
+    std::vector<prebuild_expander_type> preexpand;
+    std::vector<postbuild_expander_type> postexpand;
     Separator separator;
-    node_type node;
 };
 
 } //namespace dconfig

@@ -4,12 +4,12 @@
 //          http://www.boost.org/LICENSE_1_0.txt)
 
 //local
-#include "node.hpp"
-#include "config.hpp"
-#include "config_builder.hpp"
-#include "env_var_expander.hpp"
-#include "config_param_expander.hpp"
-#include "config_node_expander.hpp"
+#include <node.hpp>
+#include <config.hpp>
+#include <config_builder.hpp>
+#include <env_var_expander.hpp>
+#include <config_param_expander.hpp>
+#include <config_node_expander.hpp>
 
 //boost
 #include <boost/algorithm/string/predicate.hpp>
@@ -100,30 +100,38 @@ boost::property_tree::ptree buildPropertyTree(const std::string& contents)
 }
 
 // --------------------------------------------------------------------------------
-void ConfigBuilder::parse(const std::vector<std::string>& contents)
+ConfigBuilder::node_type ConfigBuilder::parse(std::vector<std::string>&& contents)
 {
-    for(auto&& config : contents)
+    ConfigBuilder::node_type root;
+    for(auto& expanded : contents)
     {
-        auto expanded = config;
-        EnvVarExpander(separator).operator()(expanded);
-
-        boost::trim(expanded);
-        auto mergeFrom = buildCustomTree(buildPropertyTree(expanded));
-        if (!node)
+        for (auto& expander : preexpand)
         {
-            node = mergeFrom;
+            expander(expanded);
+        }
+        boost::trim(expanded);
+
+        auto mergeFrom = buildCustomTree(buildPropertyTree(expanded));
+
+        if (!root)
+        {
+            root = mergeFrom;
         }
         else
         {
-            node->overwrite(std::move(*mergeFrom));
+            root->overwrite(std::move(*mergeFrom));
         }
     }
 
-    if(node && !node->empty())
+    if(root && !root->empty())
     {
-        ConfigParamExpander(separator).operator()(*node);
-        ConfigNodeExpander(separator).operator()(*node);
+        for (auto& expander : postexpand)
+        {
+            expander(*root);
+        }
     }
+
+    return root;
 }
 
 } //namespace dconfig

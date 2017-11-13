@@ -216,7 +216,7 @@ TYPED_TEST(ConfigShould, returnMultipleParameters)
     EXPECT_EQ(std::string("Value3"),values[2]);
 }
 
-TYPED_TEST(ConfigShould, supportArraysJsonArrays)
+TYPED_TEST(ConfigShould, supportJsonArrays)
 {
     this->loadConfig();
 
@@ -230,11 +230,27 @@ TYPED_TEST(ConfigShould, supportArraysJsonArrays)
     EXPECT_EQ(std::string("Elem3"),values[2]);
 }
 
+TYPED_TEST(ConfigShould, supportJsonArrays2)
+{
+    this->loadConfig();
+
+    auto scope = this->config->scope("ConfigShould.Array");
+    auto&& values = scope.template getAll<std::string>(".");
+
+    ASSERT_EQ(3, values.size());
+
+    EXPECT_EQ(std::string("Elem1"),values[0]);
+    EXPECT_EQ(std::string("Elem2"),values[1]);
+    EXPECT_EQ(std::string("Elem3"),values[2]);
+}
+
 TYPED_TEST(ConfigShould, supportArrayInjection)
 {
     this->loadConfig();
 
-    auto&& scopes = this->config->scopes("InjectedArray.");
+    auto&& scopes = this->config->scope("InjectedArray").scopes(".");
+
+    EXPECT_EQ(2, scopes.size());
 
     for (const auto& scope : scopes)
     {
@@ -292,23 +308,21 @@ TYPED_TEST(ConfigShould, supportInjectingNodes)
     EXPECT_EQ(std::string("filename")  , scope.template get<std::string>("SessionFile"));
     EXPECT_EQ(std::string("/root/data"), scope.template get<std::string>("DataPath"));
     EXPECT_EQ(std::string("STH-20-2")  , scope.template get<std::string>("SessionUniqueId2"));
-    EXPECT_EQ(std::string("Enabled"),    scope.template get<std::string>("SessionStatus"));
+    EXPECT_EQ(std::string("Enabled")   , scope.template get<std::string>("SessionStatus"));
 }
 
 TYPED_TEST(ConfigShould, supportTemplates)
 {
     this->loadConfig();
 
-    std::cout << *this->config << std::endl;
-
     auto scope = this->config->scope("ConfigShould.Templated");
 
     EXPECT_EQ(std::string("filename")  , scope.template get<std::string>("SessionFile"));
     EXPECT_EQ(std::string("/root/data"), scope.template get<std::string>("DataPath"));
     EXPECT_EQ(std::string("STH-20-2")  , scope.template get<std::string>("SessionUniqueId2"));
-    EXPECT_EQ(std::string("Enabled"),    scope.template get<std::string>("SessionStatus"));
+    EXPECT_EQ(std::string("Unknown")   , scope.template get<std::string>("SessionStatus"));
+    EXPECT_EQ(std::string("500")       , scope.template get<std::string>("SessionInstance"));
 }
-
 
 } // namespace dconfig
 } // namespace test

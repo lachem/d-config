@@ -1,7 +1,7 @@
 {
     "ConfigShould":
     {
-        "System":
+        "System"  :
         {
             "DataPath"         : "%env.RUNTIME%/data",
             "FixConfig"        : "%env.SOURCE%/data",
@@ -13,7 +13,7 @@
             "SessionStatus"    : "Disabled",
             "SessionStatus2"   : "%config.ConfigShould.System.SessionStatus%"
         },
-        "Repeated":
+        "Repeated" :
         {
             "Rep"  : "Value1",
             "Rep"  : "Value2",
@@ -26,9 +26,13 @@
             "Rep"  : "Value6"
         },
         "Injected" : "%node.ConfigShould.System%",
-        "Templated" :
+        "Templated":
         {
-            "%template.ConfigShould.System%" : {}
+            "%template.ConfigShould.System%" :
+            {
+                "SessionStatus" : "Unknown",
+                "SessionInstance" : 500
+            }
         }
     }
 }

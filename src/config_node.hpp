@@ -197,6 +197,7 @@ public:
     {
         if (key)
         {
+            clearJustSeparatorKey(key, separator);
             if (auto&& first = std::strchr(key, separator))
             {
                 auto&& nodes = this->getNodes(boost::string_ref(key, first - key));
@@ -248,6 +249,7 @@ public:
     {
         if (key)
         {
+            clearJustSeparatorKey(key, separator);
             if (auto&& first = std::strrchr(key, separator))
             {
                 auto&& nodes = this->getNodes(boost::string_ref(key, first - key));
@@ -275,13 +277,14 @@ public:
         children.get<referenced>().erase(key);
     }
 
-    void swap(ConfigNode& other)
+    void swap(ConfigNode&& other)
     {
         children.swap(other.children);
     }
 
-    ConfigNode::node_type clone() const;
     void overwrite(ConfigNode&& other);
+
+    ConfigNode::node_type clone() const;
 
     template<typename V>
     void accept(V&& visitor)
@@ -332,6 +335,11 @@ private:
                 }
             }
         }
+    }
+
+    static void clearJustSeparatorKey(const char*& key, Separator separator)
+    {
+        key = (key[0] != '\0' && key[1] == '\0' && key[0] == separator) ? "" : key;
     }
 
     static const value_list& noValues()

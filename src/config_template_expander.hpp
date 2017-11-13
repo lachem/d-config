@@ -20,6 +20,7 @@ class ConfigTemplateExpander
 {
     struct Replacement
     {
+        std::string key;
         std::string with;
         detail::ConfigNode* at;
     };
@@ -44,13 +45,24 @@ class ConfigTemplateExpander
             if (regex_match(key, what, *match))
             {
                 assert(what.size()>1);
-                result->emplace_back(Replacement{std::string((++what.begin())->str().c_str()), &parent});
+                result->emplace_back(Replacement{key, std::string((++what.begin())->str().c_str()), &parent});
             }
         }
 
-        void visit(detail::ConfigNode&, const std::string&, detail::ConfigNode& node)
+        void visit(detail::ConfigNode& parent, const std::string& key, detail::ConfigNode& node)
         {
-            node.accept(*this);
+            using namespace boost::xpressive;
+
+            smatch what;
+            if (regex_match(key, what, *match))
+            {
+                assert(what.size()>1);
+                result->emplace_back(Replacement{key, std::string((++what.begin())->str().c_str()), &parent});
+            }
+            else
+            {
+                node.accept(*this);
+            }
         }
 
         detail::ConfigNode* root;
@@ -77,7 +89,13 @@ public:
             const auto& with = root.getNodes(replacement.with, separator);
             if (!with.empty())
             {
-                replacement.at->swap(*with[0]->clone());
+                auto&& clone = with[0]->clone();
+                auto&& overwrite = replacement.at->getNodes(boost::string_ref(replacement.key));
+                if (!overwrite.empty())
+                {
+                    clone->overwrite(std::move(*overwrite[0]));
+                }
+                replacement.at->swap(std::move(*clone));
             }
         }
     }

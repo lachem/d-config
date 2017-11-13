@@ -26,6 +26,8 @@
     </Injected>
     <Templated>
         <%template.ConfigShould.System%>
+            <SessionStatus>Unknown</SessionStatus>
+            <SessionInstance>500</SessionInstance>
         </%template.ConfigShould.System%>
     </Templated>
 </ConfigShould>

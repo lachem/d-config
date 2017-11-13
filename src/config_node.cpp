@@ -8,6 +8,34 @@
 namespace dconfig {
 namespace detail {
 
+ConfigNode::node_type ConfigNode::clone() const
+{
+    auto cloned = ConfigNode::node_type(new ConfigNode());
+
+    auto currFrom = this->children.get<ordered>().begin();
+    auto endFrom  = this->children.get<ordered>().end();
+
+    while(currFrom != endFrom)
+    {
+        if (auto&& nodeListFrom = boost::get<node_list>(&currFrom->value))
+        {
+            node_list nodes;
+            for (auto&& node : *nodeListFrom)
+            {
+                nodes.emplace_back(node->clone());
+            }
+            cloned->children.get<sequenced>().push_back({currFrom->key, std::move(nodes)});
+        }
+        else
+        {
+            cloned->children.get<sequenced>().push_back({currFrom->key, currFrom->value});
+        }
+        ++currFrom;
+    }
+
+    return cloned;
+}
+
 void ConfigNode::overwrite(ConfigNode&& other)
 {
     auto currMergeTo = this->children.get<ordered>().begin();

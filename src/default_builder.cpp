@@ -10,6 +10,7 @@
 #include <env_var_expander.hpp>
 #include <config_param_expander.hpp>
 #include <config_node_expander.hpp>
+#include <config_template_expander.hpp>
 
 namespace dconfig {
 
@@ -26,6 +27,7 @@ Config DefaultBuilder::build(std::vector<std::string>&& contents) const
         [](std::string& content) { EnvVarExpander().operator()(content); },
         [sep](detail::ConfigNode& node) { ConfigParamExpander(sep).operator()(node); },
         [sep](detail::ConfigNode& node) { ConfigNodeExpander(sep).operator()(node); },
+        [sep](detail::ConfigNode& node) { ConfigTemplateExpander(sep).operator()(node); },
         separator);
     return builder.build(std::move(contents));
 }

@@ -295,6 +295,21 @@ TYPED_TEST(ConfigShould, supportInjectingNodes)
     EXPECT_EQ(std::string("Enabled"),    scope.template get<std::string>("SessionStatus"));
 }
 
+TYPED_TEST(ConfigShould, supportTemplates)
+{
+    this->loadConfig();
+
+    std::cout << *this->config << std::endl;
+
+    auto scope = this->config->scope("ConfigShould.Templated");
+
+    EXPECT_EQ(std::string("filename")  , scope.template get<std::string>("SessionFile"));
+    EXPECT_EQ(std::string("/root/data"), scope.template get<std::string>("DataPath"));
+    EXPECT_EQ(std::string("STH-20-2")  , scope.template get<std::string>("SessionUniqueId2"));
+    EXPECT_EQ(std::string("Enabled"),    scope.template get<std::string>("SessionStatus"));
+}
+
+
 } // namespace dconfig
 } // namespace test
 

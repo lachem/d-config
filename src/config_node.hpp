@@ -78,15 +78,38 @@ public:
             , boost::multi_index::sequenced
                 < boost::multi_index::tag<sequenced>> >>;
 
-
     using iterator       = decltype(std::declval<children_container>().get<sequenced>().begin());
     using const_iterator = decltype(std::declval<children_container>().get<sequenced>().cbegin());
+
+    bool empty() const
+    {
+        return children.empty();
+    }
+
+    const_iterator cbegin() const
+    {
+        return children.get<sequenced>().begin();
+    }
+
+    const_iterator cend() const
+    {
+        return children.get<sequenced>().end();
+    }
+
+    const_iterator begin() const
+    {
+        return children.get<sequenced>().begin();
+    }
+
+    const_iterator end() const
+    {
+        return children.get<sequenced>().end();
+    }
 
     template<typename S>
     friend S& operator << (S&& stream, const ConfigNode& node)
     {
         node.print(stream, "");
-
         return stream;
     }
 
@@ -247,6 +270,19 @@ public:
         return getNodes(key.c_str(), separator);
     }
 
+    void erase(const std::string& key)
+    {
+        children.get<referenced>().erase(key);
+    }
+
+    void swap(ConfigNode& other)
+    {
+        children.swap(other.children);
+    }
+
+    ConfigNode::node_type clone() const;
+    void overwrite(ConfigNode&& other);
+
     template<typename V>
     void accept(V&& visitor)
     {
@@ -270,37 +306,6 @@ public:
             }
         }
     }
-
-    void erase(const std::string& key)
-    {
-        children.get<referenced>().erase(key);
-    }
-
-    bool empty() const
-    {
-        return children.empty();
-    }
-
-    const_iterator cbegin() const
-    {
-        return children.get<sequenced>().begin();
-    }
-
-    const_iterator cend() const
-    {
-        return children.get<sequenced>().end();
-    }
-
-    const_iterator begin() const
-    {
-        return children.get<sequenced>().begin();
-    }
-
-    const_iterator end() const
-    {
-        return children.get<sequenced>().end();
-    }
-    void overwrite(ConfigNode&& other);
 
 private:
     template<typename S>

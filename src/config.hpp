@@ -85,6 +85,13 @@ public:
         return result;
     }
 
+    template<typename S>
+    friend S& operator<<(S& stream, const Config& cfg)
+    {
+        stream << *cfg.node;
+        return stream;
+    }
+
     explicit operator bool() const noexcept
     {
         return static_cast<bool>(node);

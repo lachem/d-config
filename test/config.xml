@@ -24,4 +24,8 @@
     <Injected>
         %node.ConfigShould.System%
     </Injected>
+    <Templated>
+        <%template.ConfigShould.System%>
+        </%template.ConfigShould.System%>
+    </Templated>
 </ConfigShould>

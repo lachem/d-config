@@ -25,6 +25,10 @@
             "Rep"  : "Value5",
             "Rep"  : "Value6"
         },
-        "Injected" : "%node.ConfigShould.System%"
+        "Injected" : "%node.ConfigShould.System%",
+        "Templated" :
+        {
+            "%template.ConfigShould.System%" : {}
+        }
     }
 }

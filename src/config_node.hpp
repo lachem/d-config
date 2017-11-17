@@ -250,7 +250,7 @@ public:
         if (key)
         {
             clearJustSeparatorKey(key, separator);
-            if (auto&& first = std::strrchr(key, separator))
+            if (auto&& first = std::strchr(key, separator))
             {
                 auto&& nodes = this->getNodes(boost::string_ref(key, first - key));
                 if (!nodes.empty())

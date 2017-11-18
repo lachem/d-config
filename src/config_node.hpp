@@ -33,7 +33,7 @@
 namespace dconfig {
 namespace detail {
 
-class ConfigNode
+class ConfigNode : public std::enable_shared_from_this<ConfigNode>
 {
     struct sequenced {};
     struct ordered {};
@@ -142,6 +142,7 @@ public:
     template<typename T>
     void setNode(const std::string& key, T&& node)
     {
+        node->parent = shared_from_this();
         auto&& it = children.get<ordered>().find(key);
         if (it == children.get<ordered>().end())
         {
@@ -272,17 +273,23 @@ public:
         return getNodes(key.c_str(), separator);
     }
 
+    const node_type& getParent() const
+    {
+        return parent;
+    }
+
     void erase(const std::string& key)
     {
         children.get<referenced>().erase(key);
     }
 
+    void overwrite(ConfigNode&& other);
+
     void swap(ConfigNode&& other)
     {
         children.swap(other.children);
+        updateParents(Recurse::no);
     }
-
-    void overwrite(ConfigNode&& other);
 
     ConfigNode::node_type clone() const;
 
@@ -318,20 +325,41 @@ private:
         {
             if (auto&& elem = boost::get<value_list>(&child.value))
             {
-                stream << std::endl << indent << child.key << " = [";
+                stream << std::endl
+                       << indent << child.key << " = [";
                 for (const auto& value : *elem)
                 {
                     stream << value << ",";
                 }
-                stream << "]";
+                stream << "] -> " << std::hex  << parent.get();
             }
             else
             if (auto&& elem = boost::get<node_list>(&child.value))
             {
-                stream << std::endl << indent << child.key;
+                stream << std::endl
+                       << indent << child.key
+                       << " ("   << std::hex << this << ")"
+                       << " -> " << std::hex << parent.get();
                 for (const auto& node : *elem)
                 {
                     node->print(stream, indent + "    ");
+                }
+            }
+        }
+    }
+
+    enum class Recurse { yes, no };
+    void updateParents(Recurse recurse = Recurse::yes)
+    {
+        for(auto&& child : *this)
+        {
+            if (auto&& elem = boost::get<node_list>(&child.value))
+            {
+                for (auto&& node : *elem)
+                {
+                    node->parent = shared_from_this();
+                    if (recurse == Recurse::yes)
+                        node->updateParents();
                 }
             }
         }
@@ -355,6 +383,7 @@ private:
     }
 
     children_container children;
+    node_type parent;
 };
 
 } //namespace detail

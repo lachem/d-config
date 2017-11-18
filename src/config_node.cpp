@@ -22,7 +22,7 @@ ConfigNode::node_type ConfigNode::clone() const
             node_list nodes;
             for (auto&& node : *nodeListFrom)
             {
-                nodes.emplace_back(node->clone());
+                nodes.emplace_back(std::move(node->clone()));
             }
             cloned->children.get<sequenced>().push_back({currFrom->key, std::move(nodes)});
         }
@@ -32,6 +32,8 @@ ConfigNode::node_type ConfigNode::clone() const
         }
         ++currFrom;
     }
+
+    cloned->updateParents();
 
     return cloned;
 }
@@ -95,6 +97,8 @@ void ConfigNode::overwrite(ConfigNode&& other)
     {
         this->children.insert({currMergeFrom->key, currMergeFrom->value});
     }
+
+    this->updateParents();
 }
 
 } //namespace detail

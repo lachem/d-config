@@ -30,9 +30,49 @@
         {
             "%template.ConfigShould.System%" :
             {
-                "SessionStatus" : "Unknown",
+                "SessionStatus"   : "Unknown",
                 "SessionInstance" : 500
             }
-        }
+        },
+        "Gateway"  :
+        {
+            "Parameters" :
+            {
+                "Destination"    : "None",
+                "LinkId"         : "-1"
+            },
+            "Settings" :
+            {
+                "Name"           : "%local..Parameters.Destination%",
+                "Address"        : "100.200.100.%local..Parameters.LinkId%",
+                "Description"    :
+                {
+                    "UniqueName" : "%local...Parameters.Destination%-%local...Parameters.LinkId%"
+                }
+            }
+        },
+        "Gateways" :
+        [
+            {
+                "%template.ConfigShould.Gateway%" :
+                {
+                    "Parameters" :
+                    {
+                        "Destination" : "XETRA",
+                        "LinkId"      : "155"
+                    }
+                }
+            },
+            {
+                "%template.ConfigShould.Gateway%" :
+                {
+                    "Parameters" :
+                    {
+                        "Destination" : "LSE",
+                        "LinkId"      : "156"
+                    }
+                }
+            }
+        ]
     }
 }

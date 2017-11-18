@@ -45,7 +45,7 @@ class ConfigTemplateExpander
             if (regex_match(key, what, *match))
             {
                 assert(what.size()>1);
-                result->emplace_back(Replacement{key, std::string((++what.begin())->str().c_str()), &parent});
+                result->emplace_back(Replacement{key, std::string(what[1].str().c_str()), &parent});
             }
         }
 
@@ -57,9 +57,9 @@ class ConfigTemplateExpander
             if (regex_match(key, what, *match))
             {
                 assert(what.size()>1);
-                result->emplace_back(Replacement{key, std::string((++what.begin())->str().c_str()), &parent});
+                result->emplace_back(Replacement{key, std::string(what[1].str().c_str()), &parent});
             }
-            else
+            else // TODO: Should I add support for nested templates?
             {
                 node.accept(*this);
             }
@@ -87,7 +87,7 @@ public:
         for (auto& replacement : replacements)
         {
             const auto& with = root.getNodes(replacement.with, separator);
-            if (!with.empty())
+            if (with.size() == 1)
             {
                 auto&& clone = with[0]->clone();
                 auto&& overwrite = replacement.at->getNodes(boost::string_ref(replacement.key));

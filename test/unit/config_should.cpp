@@ -24,16 +24,20 @@ namespace dconfig {
 struct XmlExtension
 {
     static const char* name() { return "xml"; }
+    static bool supportsArrays() { return false; }
 };
 
 struct JsonExtension
 {
     static const char* name() { return "json"; }
+    static bool supportsArrays() { return true; }
 };
 
 template<typename Extension>
 struct InitConfigLoader
 {
+    using extension = Extension;
+
     void loadConfig(const ::dconfig::Separator& separator = ::dconfig::Separator())
     {
         auto configFile         = std::string("test/config.") + Extension::name();
@@ -56,6 +60,8 @@ struct InitConfigLoader
 template<typename Extension>
 struct TextConfigLoader
 {
+    using extension = Extension;
+
     void loadConfig(const ::dconfig::Separator& separator = ::dconfig::Separator())
     {
         std::vector<std::string> files;
@@ -80,6 +86,8 @@ struct TextConfigLoader
 template<typename Extension>
 struct FileConfigLoader
 {
+    using extension = Extension;
+
     void loadConfig(const ::dconfig::Separator& separator = ::dconfig::Separator())
     {
         std::vector<std::string> files;
@@ -96,11 +104,12 @@ struct FileConfigLoader
 template <typename T>
 struct ConfigShould : public Test, public T
 {
+    bool supportsArrays() { return T::extension::supportsArrays(); }
 };
 
-typedef ::testing::Types<
+using TestTypes = ::testing::Types<
     FileConfigLoader<XmlExtension>,  TextConfigLoader<XmlExtension>,  InitConfigLoader<XmlExtension>,
-    FileConfigLoader<JsonExtension>, TextConfigLoader<JsonExtension>, InitConfigLoader<JsonExtension>> TestTypes;
+    FileConfigLoader<JsonExtension>, TextConfigLoader<JsonExtension>, InitConfigLoader<JsonExtension>>;
 TYPED_TEST_CASE(ConfigShould, TestTypes);
 
 TYPED_TEST(ConfigShould, inidicateInitializedState)
@@ -322,6 +331,37 @@ TYPED_TEST(ConfigShould, supportTemplates)
     EXPECT_EQ(std::string("STH-20-2")  , scope.template get<std::string>("SessionUniqueId2"));
     EXPECT_EQ(std::string("Unknown")   , scope.template get<std::string>("SessionStatus"));
     EXPECT_EQ(std::string("500")       , scope.template get<std::string>("SessionInstance"));
+}
+
+TYPED_TEST(ConfigShould, supportLocalExpansion)
+{
+    this->loadConfig();
+
+    auto scope = this->config->scope("ConfigShould.Gateway");
+
+    EXPECT_EQ(std::string("None")          , scope.template get<std::string>("Settings.Name"));
+    EXPECT_EQ(std::string("100.200.100.-1"), scope.template get<std::string>("Settings.Address"));
+    EXPECT_EQ(std::string("None--1")       , scope.template get<std::string>("Settings.Description.UniqueName"));
+}
+
+TYPED_TEST(ConfigShould, supportLocalExpansionOnTemplates)
+{
+    this->loadConfig();
+
+    auto path = std::string("ConfigShould.Gateways") + (this->supportsArrays() ? "." : "");
+    auto scopes = this->config->scopes(path);
+
+    ASSERT_EQ(2, scopes.size());
+
+    auto xetra = scopes[0];
+    EXPECT_EQ(std::string("XETRA")          , *xetra.template get<std::string>("Settings.Name"));
+    EXPECT_EQ(std::string("100.200.100.155"), *xetra.template get<std::string>("Settings.Address"));
+    EXPECT_EQ(std::string("XETRA-155")      , *xetra.template get<std::string>("Settings.Description.UniqueName"));
+
+    auto lse = scopes[1];
+    EXPECT_EQ(std::string("LSE")            , *lse.template get<std::string>("Settings.Name"));
+    EXPECT_EQ(std::string("100.200.100.156"), *lse.template get<std::string>("Settings.Address"));
+    EXPECT_EQ(std::string("LSE-156")        , *lse.template get<std::string>("Settings.Description.UniqueName"));
 }
 
 } // namespace dconfig

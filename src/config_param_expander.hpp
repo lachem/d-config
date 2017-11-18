@@ -21,9 +21,9 @@ class ConfigParamExpander
 {
     struct RegexExpander
     {
-        RegexExpander(const detail::ConfigNode* node, const Separator& aSeparator)
+        RegexExpander(const detail::ConfigNode* node, const Separator& separator)
             : node(node)
-            , separator(aSeparator)
+            , separator(separator)
         {
         }
 
@@ -47,10 +47,10 @@ class ConfigParamExpander
 
     struct Visitor
     {
-        Visitor(detail::ConfigNode* aRoot, const boost::xpressive::sregex* aMatch, const Separator& aSeparator)
-            : match(aMatch)
+        Visitor(detail::ConfigNode* aRoot, const boost::xpressive::sregex* match, const Separator& separator)
+            : match(match)
             , root(aRoot)
-            , separator(aSeparator)
+            , separator(separator)
         {
         }
 
@@ -71,8 +71,9 @@ class ConfigParamExpander
     };
 
 public:
-    explicit ConfigParamExpander(const Separator& aSeparator)
-        : separator(aSeparator)
+    explicit ConfigParamExpander(const Separator& separator, const char* prefix = "config")
+        : separator(separator)
+        , prefix(std::string("%") + prefix + '.')
     {
     }
 
@@ -80,12 +81,13 @@ public:
     {
         using namespace boost::xpressive;
 
-        sregex match = "%config." >> (s1 = -+_) >> "%";
+        sregex match = prefix.c_str() >> (s1 = -+_) >> '%';
         root.accept(Visitor(&root, &match, separator));
     }
 
 private:
     Separator separator;
+    std::string prefix;
 };
 
 } //namespace dconfig

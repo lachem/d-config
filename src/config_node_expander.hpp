@@ -60,8 +60,8 @@ class ConfigNodeExpander
     };
 
 public:
-    explicit ConfigNodeExpander(const Separator& aSeparator)
-        : separator(aSeparator)
+    explicit ConfigNodeExpander(const Separator& separator)
+        : separator(separator)
     {
     }
 

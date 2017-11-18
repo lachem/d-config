@@ -71,8 +71,8 @@ class ConfigTemplateExpander
     };
 
 public:
-    explicit ConfigTemplateExpander(const Separator& aSeparator)
-        : separator(aSeparator)
+    explicit ConfigTemplateExpander(const Separator& separator)
+        : separator(separator)
     {
     }
 

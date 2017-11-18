@@ -19,9 +19,9 @@ namespace dconfig
 struct FileFactory
 {
     template<typename T>
-    explicit FileFactory(T&& aFileList, const Separator& aSeparator = Separator())
+    explicit FileFactory(T&& aFileList, const Separator& separator = Separator())
         : files(std::forward<T>(aFileList))
-        , separator(aSeparator)
+        , separator(separator)
     {
     }
 

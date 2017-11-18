@@ -17,7 +17,7 @@ namespace dconfig {
 
 struct InitFactory
 {
-    explicit InitFactory(int argc, char** argv, const Separator& aSeparator = Separator());
+    explicit InitFactory(int argc, char** argv, const Separator& separator = Separator());
 
     Config create() const;
 

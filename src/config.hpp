@@ -100,9 +100,9 @@ public:
 private:
     friend class ConfigBuilder;
 
-    Config(const detail::ConfigNode::node_type& aNode, const Separator& aSeparator)
-        : separator(aSeparator)
-        , node(aNode)
+    Config(const detail::ConfigNode::node_type& node, const Separator& separator)
+        : separator(separator)
+        , node(node)
     {
     }
 

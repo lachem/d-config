@@ -21,9 +21,9 @@ class ConfigLocalExpander
 {
     struct RegexExpander
     {
-        RegexExpander(const detail::ConfigNode* node, const Separator& aSeparator)
+        RegexExpander(const detail::ConfigNode* node, const Separator& separator)
             : node(node)
-            , separator(aSeparator)
+            , separator(separator)
         {
         }
 
@@ -54,9 +54,9 @@ class ConfigLocalExpander
 
     struct Visitor
     {
-        Visitor(const boost::xpressive::sregex* aMatch, const Separator& aSeparator)
-            : match(aMatch)
-            , separator(aSeparator)
+        Visitor(const boost::xpressive::sregex* match, const Separator& separator)
+            : match(match)
+            , separator(separator)
         {
         }
 
@@ -76,8 +76,8 @@ class ConfigLocalExpander
     };
 
 public:
-    explicit ConfigLocalExpander(const Separator& aSeparator)
-        : separator(aSeparator)
+    explicit ConfigLocalExpander(const Separator& separator)
+        : separator(separator)
     {
     }
 

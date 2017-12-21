@@ -85,7 +85,7 @@ public:
     {
         using namespace boost::xpressive;
 
-        sregex match = "%local." >> (s1 = +as_xpr(static_cast<char>(separator))) >> (s2 = -+_) >> "%";
+        sregex match = "%local." >> (s1 = *as_xpr(static_cast<char>(separator))) >> (s2 = -+_) >> "%";
         root.accept(Visitor(&match, separator));
     }
 

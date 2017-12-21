@@ -56,6 +56,11 @@ struct XmlExtension
                         </Parameters>
                    </%template.Config.Gateway%>
                 </Gateways>
+                <Algo>
+                    <IOC>true</IOC>
+                    <Limit>%local.IOC%</Limit>
+                    <Smoke>%local.Limit%</Smoke>
+                </Algo>
             </Config>)";
     }
 };
@@ -107,7 +112,13 @@ struct JsonExtension
                             }
                         }
                     }
-                ]
+                ],
+                "Algo" :
+                {
+                    "IOC"   : "true",
+                    "Limit" : "%local.IOC%",
+                    "Smoke" : "%local.Limit%"
+                }
             }})";
     }
 };
@@ -137,7 +148,7 @@ TYPED_TEST(LocalExpanderShould, expandNodesMarkedLocal)
     EXPECT_EQ(std::string("None--1")       , scope.template get<std::string>("Settings.Description.UniqueName"));
 }
 
-TYPED_TEST(LocalExpanderShould, supportLocalExpansionOnTemplates)
+TYPED_TEST(LocalExpanderShould, expandLocalExpansionOnTemplates)
 {
     auto path = std::string("Config.Gateways") + (this->supportsArrays() ? "." : "");
     auto scopes = this->config->scopes(path);
@@ -153,6 +164,13 @@ TYPED_TEST(LocalExpanderShould, supportLocalExpansionOnTemplates)
     EXPECT_EQ(std::string("LSE")            , *lse.template get<std::string>("Settings.Name"));
     EXPECT_EQ(std::string("100.200.100.156"), *lse.template get<std::string>("Settings.Address"));
     EXPECT_EQ(std::string("LSE-156")        , *lse.template get<std::string>("Settings.Description.UniqueName"));
+}
+
+TYPED_TEST(LocalExpanderShould, expandChainOfReferences)
+{
+    EXPECT_EQ(std::string("true"), *this->config->template get<std::string>("Config.Algo.IOC"  ));
+    EXPECT_EQ(std::string("true"), *this->config->template get<std::string>("Config.Algo.Limit"));
+    EXPECT_EQ(std::string("true"), *this->config->template get<std::string>("Config.Algo.Smoke"));
 }
 
 } // namespace dconfig

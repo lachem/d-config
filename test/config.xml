@@ -30,33 +30,4 @@
             <SessionInstance>500</SessionInstance>
         </%template.ConfigShould.System%>
     </Templated>
-    <Gateway>
-        <Parameters>
-            <Destination>None</Destination>
-            <LinkId>-1</LinkId>
-        </Parameters>
-        <Settings>
-            <Name>%local..Parameters.Destination%</Name>
-            <Address>100.200.100.%local..Parameters.LinkId%</Address>
-            <Description>
-                <UniqueName>%local...Parameters.Destination%-%local...Parameters.LinkId%</UniqueName>
-            </Description>
-        </Settings>
-    </Gateway>
-    <Gateways>
-        <%template.ConfigShould.Gateway%>
-            <Parameters>
-                <Destination>XETRA</Destination>
-                <LinkId>155</LinkId>
-            </Parameters>
-        </%template.ConfigShould.Gateway%>
-    </Gateways>
-    <Gateways>
-       <%template.ConfigShould.Gateway%>
-            <Parameters>
-                <Destination>LSE</Destination>
-                <LinkId>156</LinkId>
-            </Parameters>
-       </%template.ConfigShould.Gateway%>
-    </Gateways>
 </ConfigShould>

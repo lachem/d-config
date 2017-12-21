@@ -333,37 +333,6 @@ TYPED_TEST(ConfigShould, supportTemplates)
     EXPECT_EQ(std::string("500")       , scope.template get<std::string>("SessionInstance"));
 }
 
-TYPED_TEST(ConfigShould, supportLocalExpansion)
-{
-    this->loadConfig();
-
-    auto scope = this->config->scope("ConfigShould.Gateway");
-
-    EXPECT_EQ(std::string("None")          , scope.template get<std::string>("Settings.Name"));
-    EXPECT_EQ(std::string("100.200.100.-1"), scope.template get<std::string>("Settings.Address"));
-    EXPECT_EQ(std::string("None--1")       , scope.template get<std::string>("Settings.Description.UniqueName"));
-}
-
-TYPED_TEST(ConfigShould, supportLocalExpansionOnTemplates)
-{
-    this->loadConfig();
-
-    auto path = std::string("ConfigShould.Gateways") + (this->supportsArrays() ? "." : "");
-    auto scopes = this->config->scopes(path);
-
-    ASSERT_EQ(2, scopes.size());
-
-    auto xetra = scopes[0];
-    EXPECT_EQ(std::string("XETRA")          , *xetra.template get<std::string>("Settings.Name"));
-    EXPECT_EQ(std::string("100.200.100.155"), *xetra.template get<std::string>("Settings.Address"));
-    EXPECT_EQ(std::string("XETRA-155")      , *xetra.template get<std::string>("Settings.Description.UniqueName"));
-
-    auto lse = scopes[1];
-    EXPECT_EQ(std::string("LSE")            , *lse.template get<std::string>("Settings.Name"));
-    EXPECT_EQ(std::string("100.200.100.156"), *lse.template get<std::string>("Settings.Address"));
-    EXPECT_EQ(std::string("LSE-156")        , *lse.template get<std::string>("Settings.Description.UniqueName"));
-}
-
 } // namespace dconfig
 } // namespace test
 

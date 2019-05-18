@@ -16,12 +16,18 @@ Config FileFactory::create() const
 {
     std::vector<std::string> contents;
     for(auto&& filename : files)
-    {
-        std::ifstream fileStream(filename);
-        contents.emplace_back(std::string(
-            std::istreambuf_iterator<char>(fileStream),
-            std::istreambuf_iterator<char>())
-        );
+    {        
+        std::ifstream in(filename, std::ios::in | std::ios::binary);
+        if (in)
+        {
+            std::string loaded;
+            in.seekg(0, std::ios::end);
+            loaded.resize(in.tellg());
+            in.seekg(0, std::ios::beg);
+            in.read(&loaded[0], loaded.size());
+            in.close();
+            contents.push_back(std::move(loaded));
+        }
     }
     return DefaultBuilder(separator).build(std::move(contents));
 }

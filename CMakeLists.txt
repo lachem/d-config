@@ -33,8 +33,16 @@ message(STATUS "Cache line size: ${HOOLA_CACHE_LINE_SIZE}")
 
 find_package(Boost 1.48 REQUIRED program_options)
 
-set(GMOCK_INCLUDE_DIRS "$ENV{GMOCK_ROOT}/include")
-set(GMOCK_LIBRARY "$ENV{GMOCK_ROOT}/lib/libgmock.so")
+if(DEFINED ENV{GMOCK_ROOT})
+    set(GMOCK_ROOT "$ENV{GMOCK_ROOT}")
+else()
+    set(GMOCK_ROOT "/usr")
+endif()
+
+message(STATUS "Using gmock root: ${GMOCK_ROOT}")
+
+set(GMOCK_INCLUDE_DIRS "${GMOCK_ROOT}/include")
+set(GMOCK_LIBRARY "${GMOCK_ROOT}/lib/libgmock.a")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin/")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib/")

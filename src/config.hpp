@@ -23,6 +23,12 @@ public:
     template<typename T>
     boost::optional<T> get(const std::string& path) const
     {
+        return this->get<T>(path.c_str());
+    }
+
+    template<typename T>
+    boost::optional<T> get(const char* path) const
+    {
         if(node)
         {
             auto value = get<std::string>(path);
@@ -36,6 +42,12 @@ public:
 
     template<typename T>
     std::vector<T> getAll(const std::string& path) const
+    {        
+        return this->getAll<T>(path.c_str());
+    }
+
+    template<typename T>
+    std::vector<T> getAll(const char* path) const
     {
         std::vector<T> result;
         if(node)
@@ -52,6 +64,11 @@ public:
 
     const std::vector<std::string>& getRef(const std::string& path) const
     {
+        return this->getRef(path.c_str());
+    }
+
+    const std::vector<std::string>& getRef(const char* path) const
+    {
         static const std::vector<std::string> empty;
         return (node)
             ? node->getValues(path, separator)
@@ -59,6 +76,11 @@ public:
     }
 
     Config scope(const std::string& path) const
+    {
+        return this->scope(path.c_str());
+    }
+
+    Config scope(const char* path) const
     {
         if (node)
         {
@@ -72,6 +94,11 @@ public:
     }
 
     std::vector<Config> scopes(const std::string& path) const
+    {
+        return this->scopes(path.c_str());
+    }
+
+    std::vector<Config> scopes(const char* path) const
     {
         std::vector<Config> result;
         if(node)
@@ -111,7 +138,7 @@ private:
 };
 
 template<>
-inline boost::optional<std::string> Config::get<std::string>(const std::string& path) const
+inline boost::optional<std::string> Config::get<std::string>(const char* path) const
 {
     if(node)
     {
@@ -125,7 +152,7 @@ inline boost::optional<std::string> Config::get<std::string>(const std::string& 
 }
 
 template<>
-inline std::vector<std::string> Config::getAll<std::string>(const std::string& path) const
+inline std::vector<std::string> Config::getAll<std::string>(const char* path) const
 {
     static std::vector<std::string> empty;
     return (node)

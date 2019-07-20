@@ -333,14 +333,30 @@ TYPED_TEST(ConfigShould, supportTemplates)
     EXPECT_EQ(std::string("500")       , scope.template get<std::string>("SessionInstance"));
 }
 
+TYPED_TEST(ConfigShould, supportBooleanValues)
+{
+    this->loadConfig();
+
+    EXPECT_TRUE(*this->config->template get<bool>("ConfigShould.BooleanTrue"));
+    EXPECT_FALSE(*this->config->template get<bool>("ConfigShould.BooleanFalse"));
+}
+
+TYPED_TEST(ConfigShould, supportIntegerBooleanValues)
+{
+    this->loadConfig();
+
+    EXPECT_TRUE(*this->config->template get<bool>("ConfigShould.IntTrue"));
+    EXPECT_FALSE(*this->config->template get<bool>("ConfigShould.IntFalse"));
+}
+
 // TYPED_TEST(ConfigShould, getValuesWithAlternatives)
 // {
 //     this->loadConfig();
 //     auto expected = std::string("Enabled");
 //     auto actual = this->config->template get<std::string>(
 //         alternatives(
-//             "ConfigShould.non-existent", 
-//             "ConfigShould.System.non-existent", 
+//             "ConfigShould.non-existent",
+//             "ConfigShould.System.non-existent",
 //             "ConfigShould.System.SessionStatus"
 //         )
 //     );

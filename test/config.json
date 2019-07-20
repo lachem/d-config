@@ -33,6 +33,10 @@
                 "SessionStatus"   : "Unknown",
                 "SessionInstance" : 500
             }
-        }
+        },
+        "BooleanTrue" : true,
+        "BooleanFalse" : false,
+        "IntTrue" : 1,
+        "IntFalse" : 0
     }
 }

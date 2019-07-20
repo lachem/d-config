@@ -42,7 +42,7 @@ public:
 
     template<typename T>
     std::vector<T> getAll(const std::string& path) const
-    {        
+    {
         return this->getAll<T>(path.c_str());
     }
 
@@ -148,7 +148,27 @@ inline boost::optional<std::string> Config::get<std::string>(const char* path) c
             return boost::optional<std::string>(values[0]);
         }
     }
-    return boost::optional<std::string>();
+    return {};
+}
+
+template<>
+inline boost::optional<bool> Config::get<bool>(const char* path) const
+{
+    if (auto&& value = this->get<std::string>(path))
+    {
+        if (*value == "true")
+        {
+            return true;
+        }
+        if (*value == "false")
+        {
+            return false;
+        }
+
+        return boost::lexical_cast<bool>(*value);
+    }
+
+    return {};
 }
 
 template<>

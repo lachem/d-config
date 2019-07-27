@@ -18,13 +18,6 @@ namespace po = boost::program_options;
 namespace dconfig
 {
 
-InitFactory::InitFactory(int anArgc, char** anArgv, const Separator& separator)
-    : argc(anArgc)
-    , argv(anArgv)
-    , separator(separator)
-{
-}
-
 Config InitFactory::create() const
 {
     return FileFactory(std::move(readFiles()), separator).create();

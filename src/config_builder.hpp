@@ -7,6 +7,8 @@
 //local
 #include <config.hpp>
 #include <config_node.hpp>
+#include <separator.hpp>
+#include <array_key.hpp>
 
 //std
 #include <memory>
@@ -58,9 +60,14 @@ private:
         postexpand.push_back(post);
     }
 
-    void segregate(const Separator& separator)
+    void segregate(Separator separator)
     {
         this->separator = separator;
+    }
+
+    void segregate(ArrayKey arrayKey)
+    {
+        this->arrayKey = arrayKey;
     }
 
     void segregate()
@@ -71,6 +78,7 @@ private:
     std::vector<prebuild_expander_type> preexpand;
     std::vector<postbuild_expander_type> postexpand;
     Separator separator;
+    ArrayKey arrayKey;
 };
 
 } //namespace dconfig

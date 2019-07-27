@@ -107,7 +107,7 @@ In certain cases it is necessary to repeat same value inside the config in multi
 **Note** | This functionality is based on text replacement, thus there are no limitations on the number of aliases in one expression 
 
 ### Note About Arrays
-The api is the same for XML and JSON files with one exception namely arrays. As there is no notion of an array in XML hence the following syntax will work only for JSON files:
+The api is the same for XML and JSON files with one exception namely arrays. As there is no notion of an array in XML the syntax for array in XML is slightly different than for json and requires the usage of special tag character:
 ```cpp
 std::vector<int32_t> value = confg.getAll<int32_t>("Config.Array.");
 ```
@@ -118,6 +118,17 @@ Corresponding json file:
   {
     "Array": [ 10, 20 ]
   }
+}
+```
+Corresponding xml file:
+```json
+{
+  <Config>
+    <Array>
+      <.>10</.>
+      <.>10</.>
+    </Array>
+  </Config>
 }
 ```
 **Note** | Using ```getAll<...>("Config.Element")``` is different from ```getAll<...>("Config.Element.")``` as the former refers to repeated Element tag and the latter to an array under Element tag.

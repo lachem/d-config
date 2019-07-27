@@ -62,6 +62,7 @@ class ConfigNodeExpander
 public:
     explicit ConfigNodeExpander(const Separator& separator)
         : separator(separator)
+        , prefix(std::string("%node") + static_cast<char>(separator))
     {
     }
 
@@ -69,7 +70,7 @@ public:
     {
         using namespace boost::xpressive;
 
-        sregex match = *(blank | _ln) >> "%node." >> (s1 = -+_) >> "%" >> *(blank | _ln);
+        sregex match = *(blank | _ln) >> prefix.c_str() >> (s1 = -+_) >> "%" >> *(blank | _ln);
 
         std::vector<Replacement> replacements;
         root.accept(Visitor(&root, &match, &replacements));
@@ -85,6 +86,7 @@ public:
 
 private:
     Separator separator;
+    std::string prefix;
 };
 
 } //namespace dconfig

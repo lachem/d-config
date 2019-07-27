@@ -6,6 +6,8 @@
 
 //local
 #include <config.hpp>
+#include <separator.hpp>
+#include <array_key.hpp>
 
 //std
 #include <string>
@@ -15,8 +17,9 @@ namespace dconfig {
 
 struct DefaultBuilder
 {
-    explicit DefaultBuilder(Separator separator = Separator())
+    explicit DefaultBuilder(Separator separator = Separator(), ArrayKey arrayKey = ArrayKey())
         : separator(separator)
+        , arrayKey(arrayKey)
     {
     }
 
@@ -29,6 +32,7 @@ struct DefaultBuilder
 
 private:
     Separator separator;
+    ArrayKey arrayKey;
 };
 
 } //namespace dconfig

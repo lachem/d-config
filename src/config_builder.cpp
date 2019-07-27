@@ -26,7 +26,7 @@
 namespace dconfig {
 
 // --------------------------------------------------------------------------------
-ConfigBuilder::node_type buildCustomTree(const boost::property_tree::ptree& source)
+ConfigBuilder::node_type buildCustomTree(const boost::property_tree::ptree& source, const ArrayKey& arrayKey)
 {
     using element_type = std::pair<const boost::property_tree::ptree*, std::shared_ptr<detail::ConfigNode>>;
 
@@ -43,13 +43,27 @@ ConfigBuilder::node_type buildCustomTree(const boost::property_tree::ptree& sour
             if (!node.second.empty())
             {
                 auto&& insert = std::make_shared<detail::ConfigNode>();
-                queue.front().second->setNode(key, insert);
+                if (!key.empty() && key[0] != arrayKey.value)
+                {
+                    queue.front().second->setNode(key, insert);
+                }
+                else
+                {
+                    queue.front().second->setNode("", insert);
+                }
                 next.push(std::make_pair(&node.second, insert));
             }
             else
             {
                 auto&& value = node.second.get_value<std::string>();
-                queue.front().second->setValue(key, std::move(value));
+                if (!key.empty() && key[0] != arrayKey.value)
+                {
+                    queue.front().second->setValue(key, std::move(value));
+                }
+                else
+                {
+                    queue.front().second->setValue("", std::move(value));
+                }
             }
         }
 
@@ -108,7 +122,7 @@ ConfigBuilder::node_type ConfigBuilder::parse(std::vector<std::string>&& content
         }
         boost::trim(expanded);
 
-        auto mergeFrom = buildCustomTree(buildPropertyTree(expanded));
+        auto mergeFrom = buildCustomTree(buildPropertyTree(expanded), arrayKey);
 
         if (!root)
         {

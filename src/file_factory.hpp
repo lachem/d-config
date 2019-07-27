@@ -8,6 +8,7 @@
 //local
 #include <config.hpp>
 #include <separator.hpp>
+#include <array_key.hpp>
 
 //std
 #include <string>
@@ -19,9 +20,10 @@ namespace dconfig
 struct FileFactory
 {
     template<typename T>
-    explicit FileFactory(T&& aFileList, const Separator& separator = Separator())
+    explicit FileFactory(T&& aFileList, Separator separator = Separator(), ArrayKey arrayKey = ArrayKey())
         : files(std::forward<T>(aFileList))
         , separator(separator)
+        , arrayKey(arrayKey)
     {
     }
 
@@ -30,6 +32,7 @@ struct FileFactory
 private:
     std::vector<std::string> files;
     Separator separator;
+    ArrayKey arrayKey;
 };
 
 } //namespace dconfig

@@ -19,6 +19,7 @@ using testing::_;
 
 namespace test {
 namespace dconfig {
+namespace {
 
 struct XmlExtension
 {
@@ -33,10 +34,10 @@ struct XmlExtension
                         <LinkId>-1</LinkId>
                     </Parameters>
                     <Settings>
-                        <Name>%local..Parameters.Destination%</Name>
-                        <Address>100.200.100.%local..Parameters.LinkId%</Address>
+                        <Name>%param..Parameters.Destination%</Name>
+                        <Address>100.200.100.%param..Parameters.LinkId%</Address>
                         <Description>
-                            <UniqueName>%local...Parameters.Destination%-%local...Parameters.LinkId%</UniqueName>
+                            <UniqueName>%param...Parameters.Destination%-%param...Parameters.LinkId%</UniqueName>
                         </Description>
                     </Settings>
                 </Gateway>
@@ -58,8 +59,8 @@ struct XmlExtension
                 </Gateways>
                 <Algo>
                     <IOC>true</IOC>
-                    <Limit>%local.IOC%</Limit>
-                    <Smoke>%local.Limit%</Smoke>
+                    <Limit>%param.IOC%</Limit>
+                    <Smoke>%param.Limit%</Smoke>
                 </Algo>
             </Config>)";
     }
@@ -82,11 +83,11 @@ struct JsonExtension
                     },
                     "Settings" :
                     {
-                        "Name"           : "%local..Parameters.Destination%",
-                        "Address"        : "100.200.100.%local..Parameters.LinkId%",
+                        "Name"           : "%param..Parameters.Destination%",
+                        "Address"        : "100.200.100.%param..Parameters.LinkId%",
                         "Description"    :
                         {
-                            "UniqueName" : "%local...Parameters.Destination%-%local...Parameters.LinkId%"
+                            "UniqueName" : "%param...Parameters.Destination%-%param...Parameters.LinkId%"
                         }
                     }
                 },
@@ -116,15 +117,15 @@ struct JsonExtension
                 "Algo" :
                 {
                     "IOC"   : "true",
-                    "Limit" : "%local.IOC%",
-                    "Smoke" : "%local.Limit%"
+                    "Limit" : "%param.IOC%",
+                    "Smoke" : "%param.Limit%"
                 }
             }})";
     }
 };
 
 template<typename T>
-struct LocalExpanderShould : public Test, public T
+struct ParamExpanderShould : public Test, public T
 {
     void SetUp() override
     {
@@ -137,9 +138,9 @@ struct LocalExpanderShould : public Test, public T
 };
 
 using TestTypes = ::testing::Types<XmlExtension, JsonExtension>;
-TYPED_TEST_CASE(LocalExpanderShould, TestTypes);
+TYPED_TEST_CASE(ParamExpanderShould, TestTypes);
 
-TYPED_TEST(LocalExpanderShould, expandNodesMarkedLocal)
+TYPED_TEST(ParamExpanderShould, expandNodesMarkedParam)
 {
     auto scope = this->config->scope("Config.Gateway");
 
@@ -148,7 +149,7 @@ TYPED_TEST(LocalExpanderShould, expandNodesMarkedLocal)
     EXPECT_EQ(std::string("None--1")       , scope.template get<std::string>("Settings.Description.UniqueName"));
 }
 
-TYPED_TEST(LocalExpanderShould, expandLocalExpansionOnTemplates)
+TYPED_TEST(ParamExpanderShould, expandParamExpansionOnTemplates)
 {
     auto path = std::string("Config.Gateways") + (this->supportsArrays() ? "." : "");
     auto scopes = this->config->scopes(path);
@@ -166,13 +167,14 @@ TYPED_TEST(LocalExpanderShould, expandLocalExpansionOnTemplates)
     EXPECT_EQ(std::string("LSE-156")        , *lse.template get<std::string>("Settings.Description.UniqueName"));
 }
 
-TYPED_TEST(LocalExpanderShould, expandChainOfReferences)
+TYPED_TEST(ParamExpanderShould, expandChainOfReferences)
 {
     EXPECT_EQ(std::string("true"), *this->config->template get<std::string>("Config.Algo.IOC"  ));
     EXPECT_EQ(std::string("true"), *this->config->template get<std::string>("Config.Algo.Limit"));
     EXPECT_EQ(std::string("true"), *this->config->template get<std::string>("Config.Algo.Smoke"));
 }
 
+} // namespace
 } // namespace dconfig
 } // namespace test
 

@@ -8,6 +8,8 @@
 //local
 #include <config.hpp>
 #include <file_factory.hpp>
+#include <separator.hpp>
+#include <array_key.hpp>
 
 //std
 #include <string>
@@ -17,7 +19,13 @@ namespace dconfig {
 
 struct InitFactory
 {
-    explicit InitFactory(int argc, char** argv, const Separator& separator = Separator());
+    explicit InitFactory(int argc, char** argv, Separator separator = Separator(), ArrayKey arrayKey = ArrayKey())
+        : argc(argc)
+        , argv(argv)
+        , separator(separator)
+        , arrayKey(arrayKey)
+    {
+    }
 
     Config create() const;
 
@@ -27,6 +35,7 @@ private:
     int argc;
     char** argv;
     Separator separator;
+    ArrayKey arrayKey;
 };
 
 

@@ -154,7 +154,12 @@ TYPED_TEST(ConfigShould, allowSlashSeperator)
 TYPED_TEST(ConfigShould, expandConfigParameters)
 {
     this->loadConfig();
-    EXPECT_EQ(std::string("STH-20"), this->config->template get<std::string>("ConfigShould.System.SessionUniqueId"));
+
+    auto expected = std::string("STH-20");
+    auto actual = this->config->template get<std::string>("ConfigShould.System.SessionUniqueId");
+
+    ASSERT_TRUE(actual);
+    EXPECT_EQ(expected, *actual);
 }
 
 TYPED_TEST(ConfigShould, expandConfigParametersUsingPreviouslyExpandedParameters)
@@ -253,26 +258,6 @@ TYPED_TEST(ConfigShould, supportJsonArrays2)
     EXPECT_EQ(std::string("Elem3"),values[2]);
 }
 
-TYPED_TEST(ConfigShould, supportArrayInjection)
-{
-    this->loadConfig();
-
-    auto&& scopes = this->config->scope("InjectedArray").scopes(".");
-
-    EXPECT_EQ(2, scopes.size());
-
-    for (const auto& scope : scopes)
-    {
-        auto&& values = scope.template getAll<std::string>("Array.");
-
-        ASSERT_EQ(3, values.size());
-
-        EXPECT_EQ(std::string("Elem1"),values[0]);
-        EXPECT_EQ(std::string("Elem2"),values[1]);
-        EXPECT_EQ(std::string("Elem3"),values[2]);
-    }
-}
-
 TYPED_TEST(ConfigShould, supportArraysByRef)
 {
     this->loadConfig();
@@ -306,18 +291,6 @@ TYPED_TEST(ConfigShould, provideValuesByRefFromInternalRepresentation)
     EXPECT_EQ(std::string("Elem1"),values[0]);
     EXPECT_EQ(overwrite           ,values[1]);
     EXPECT_EQ(std::string("Elem3"),values[2]);
-}
-
-TYPED_TEST(ConfigShould, supportInjectingNodes)
-{
-    this->loadConfig();
-
-    auto scope = this->config->scope("ConfigShould.Injected");
-
-    EXPECT_EQ(std::string("filename")  , scope.template get<std::string>("SessionFile"));
-    EXPECT_EQ(std::string("/root/data"), scope.template get<std::string>("DataPath"));
-    EXPECT_EQ(std::string("STH-20-2")  , scope.template get<std::string>("SessionUniqueId2"));
-    EXPECT_EQ(std::string("Enabled")   , scope.template get<std::string>("SessionStatus"));
 }
 
 TYPED_TEST(ConfigShould, supportTemplates)

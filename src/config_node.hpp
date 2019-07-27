@@ -268,6 +268,7 @@ public:
         return noNodes();
     }
 
+
     const node_list& getNodes(const std::string& key, Separator separator) const
     {
         return getNodes(key.c_str(), separator);

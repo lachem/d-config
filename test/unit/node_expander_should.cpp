@@ -52,6 +52,17 @@ struct XmlExtension
                     <.>%node.ConfigShould.Ingredients%</.>
                     <.>%node.ConfigShould.Ingredients%</.>
                 </ArrayInjected>
+                <Gateway>
+                    <Parameters>
+                        <Destination>XETRA</Destination>
+                        <LinkId>155</LinkId>
+                    </Parameters>
+                    <Settings>
+                        <Link>%node..Parameters%</Link>
+                    </Settings>
+                    <ParametersAlias>%node.Parameters%</ParametersAlias>
+                    <LinkAlias>%node.Settings.Link%</LinkAlias>
+                </Gateway>
             </ConfigShould>)";
     }
 };
@@ -88,7 +99,21 @@ struct JsonExtension
                 [
                     "%node.ConfigShould.Ingredients%",
                     "%node.ConfigShould.Ingredients%"
-                ]
+                ],
+                "Gateway"  :
+                {
+                    "Parameters" :
+                    {
+                        "Destination" : "XETRA",
+                        "LinkId"      : "155"
+                    },
+                    "Settings" :
+                    {
+                        "Link" : "%node..Parameters%"
+                    },
+                    "ParametersAlias" : "%node.Parameters%",
+                    "LinkAlias" : "%node.Settings.Link%"
+                }
             }})";
     }
 };
@@ -135,6 +160,45 @@ TYPED_TEST(NodeExpanderShould, supportArrayExpansion)
         EXPECT_EQ(std::string("Elem2"),values[1]);
         EXPECT_EQ(std::string("Elem3"),values[2]);
     }
+}
+
+TYPED_TEST(NodeExpanderShould, expandNodeWithRelativePath)
+{
+    auto scope = this->config->scope("ConfigShould.Gateway.Settings");
+
+    auto actual = scope.template get<std::string>("Link.Destination");
+    ASSERT_TRUE(static_cast<bool>(actual));
+    EXPECT_EQ(std::string("XETRA"), *actual);
+
+    actual = scope.template get<std::string>("Link.LinkId");
+    ASSERT_TRUE(static_cast<bool>(actual));
+    EXPECT_EQ(std::string("155"), *actual);
+}
+
+TYPED_TEST(NodeExpanderShould, expandNodeWithRelativeSameLevelPath)
+{
+    auto scope = this->config->scope("ConfigShould.Gateway.ParametersAlias");
+
+    auto actual = scope.template get<std::string>("Destination");
+    ASSERT_TRUE(static_cast<bool>(actual));
+    EXPECT_EQ(std::string("XETRA"), *actual);
+
+    actual = scope.template get<std::string>("LinkId");
+    ASSERT_TRUE(static_cast<bool>(actual));
+    EXPECT_EQ(std::string("155"), *actual);
+}
+
+TYPED_TEST(NodeExpanderShould, expandChainOfReferences)
+{
+    auto scope = this->config->scope("ConfigShould.Gateway.LinkAlias");
+
+    auto actual = scope.template get<std::string>("Destination");
+    ASSERT_TRUE(static_cast<bool>(actual));
+    EXPECT_EQ(std::string("XETRA"), *actual);
+
+    actual = scope.template get<std::string>("LinkId");
+    ASSERT_TRUE(static_cast<bool>(actual));
+    EXPECT_EQ(std::string("155"), *actual);
 }
 
 } // namespace

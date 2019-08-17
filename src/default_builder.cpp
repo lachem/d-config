@@ -26,9 +26,9 @@ Config DefaultBuilder::build(std::vector<std::string>&& contents) const
     ConfigBuilder builder(
         [](std::string& content) { EnvVarExpander().operator()(content); },
         [sep](detail::ConfigNode& node) { ConfigParamExpander(sep, "config").operator()(node); },
-        [sep](detail::ConfigNode& node) { ConfigTemplateExpander(sep).operator()(node); },
+        [sep](detail::ConfigNode& node) { ConfigTemplateExpander(sep, "template").operator()(node); },
         [sep](detail::ConfigNode& node) { ConfigParamExpander(sep, "param").operator()(node); },
-        [sep](detail::ConfigNode& node) { ConfigNodeExpander(sep).operator()(node); },
+        [sep](detail::ConfigNode& node) { ConfigNodeExpander(sep, "node").operator()(node); },
         separator,
         arrayKey);
     return builder.build(std::move(contents));

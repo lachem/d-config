@@ -14,6 +14,7 @@
 //std
 #include <cassert>
 #include <iostream>
+#include <stdexcept>
 
 namespace dconfig {
 
@@ -70,6 +71,8 @@ class ConfigParamExpander
                 }
             }
 
+            throw std::invalid_argument("");
+
             static const std::string empty;
             return empty;
         }
@@ -93,13 +96,23 @@ class ConfigParamExpander
             assert(levelUp);
         }
 
-        void visit(detail::ConfigNode& parent, const std::string&, std::string& value)
+        void visit(detail::ConfigNode& parent, const std::string& key, size_t index, std::string& value)
         {
             using namespace boost::xpressive;
-            value = regex_replace(value, *match, RegexExpander(root, &parent, separator, levelUp));
+
+            try
+            {
+                value = regex_replace(value, *match, RegexExpander(root, &parent, separator, levelUp));
+            }
+            catch (const std::invalid_argument&)
+            {
+                throw std::invalid_argument(
+                        std::string("Could not find \"") + value + "\" to inject at \"" +
+                        key + "[" + std::to_string(index) + "]\"");
+            }
         }
 
-        void visit(detail::ConfigNode&, const std::string&, detail::ConfigNode& node)
+        void visit(detail::ConfigNode&, const std::string&, size_t, detail::ConfigNode& node)
         {
             node.accept(*this);
         }

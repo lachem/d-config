@@ -121,7 +121,9 @@ TYPED_TEST(ConfigShould, inidicateInitializedState)
 TYPED_TEST(ConfigShould, returnSingleParameters)
 {
     this->loadConfig();
-    EXPECT_EQ(std::string("filename"), this->config->template get<std::string>("ConfigShould.System.SessionFile"));
+
+    auto actual = this->config->template get<std::string>("ConfigShould.System.SessionFile");
+    EXPECT_EQ(std::string("filename"), *actual);
 }
 
 TYPED_TEST(ConfigShould, returnSingleParametersByRef)

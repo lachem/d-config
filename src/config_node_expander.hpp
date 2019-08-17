@@ -16,6 +16,8 @@
 #include <vector>
 #include <cassert>
 #include <cstring>
+#include <algorithm>
+#include <stdexcept>
 
 namespace dconfig {
 
@@ -24,7 +26,8 @@ class ConfigNodeExpander
     struct KeyNode
     {
         std::string key;
-        const detail::ConfigNode::node_type node;
+        detail::ConfigNode::node_type node;
+        size_t index;
     };
 
     using replacement_container = std::unordered_map<detail::ConfigNode*, std::vector<KeyNode>>;
@@ -47,14 +50,14 @@ class ConfigNodeExpander
             assert(result);
         }
 
-        void visit(detail::ConfigNode& parent, const std::string& key, std::string& value)
+        void visit(detail::ConfigNode& parent, const std::string& key, size_t index, std::string& value)
         {
             using namespace boost::xpressive;
 
             smatch what;
             if (regex_match(value, what, *match))
             {
-                assert(what.size()>3);
+                assert(what.size() > 3);
 
                 auto scope = root;
                 if (!what[1].str().empty())
@@ -72,26 +75,32 @@ class ConfigNodeExpander
                     }
                 }
 
-                if (!addKeyNode(scope, &parent, key, what[3].str()) && scope == root)
-                {
-                    //for backward compatiblity fallback to node scope
-                    addKeyNode(&parent, &parent, key, what[3].str());
-                }
+
+                if (addKeyNode(scope, &parent, key, index, what[3].str()))
+                    return;
+
+                //for backward compatiblity fallback to node scope
+                if (scope == root && addKeyNode(&parent, &parent, key, index, what[3].str()))
+                    return;
+
+                throw std::invalid_argument(
+                    std::string("Could not find \"") + value + "\" to inject at \"" +
+                    key + "[" + std::to_string(index) + "]\"");
             }
         }
 
-        void visit(detail::ConfigNode&, const std::string&, detail::ConfigNode& node)
+        void visit(detail::ConfigNode&, const std::string&, size_t, detail::ConfigNode& node)
         {
             node.accept(*this);
         }
 
     private:
-        bool addKeyNode(detail::ConfigNode* scope, detail::ConfigNode* parent, const std::string& key, const std::string& from)
+        bool addKeyNode(detail::ConfigNode* scope, detail::ConfigNode* parent, const std::string& key, size_t index, const std::string& from)
         {
-            auto&& nodes = scope->getNodes(from.c_str(), separator);
+            auto &&nodes = scope->getNodes(from.c_str(), separator);
             if (!nodes.empty())
             {
-                (*result)[parent].emplace_back(KeyNode{key, nodes[0]});
+                (*result)[parent].emplace_back(KeyNode{key, nodes[0], index});
                 return true;
             }
 
@@ -105,7 +114,8 @@ class ConfigNodeExpander
                     {
                         if (replacement.key == baseKeyNode.key)
                         {
-                            (*result)[parent].emplace_back(KeyNode{key, replacement.node});
+                            (*result)[parent].emplace_back(KeyNode{key, replacement.node, index});
+                            return true;
                         }
                     }
                 }
@@ -119,7 +129,7 @@ class ConfigNodeExpander
         //TODO: consider moving this to ConfigNode
         KeyNode getBaseNode(detail::ConfigNode* scope, const std::string& key) const
         {
-            auto &&values = scope->getValues(key.c_str(), separator);
+            auto&& values = scope->getValues(key.c_str(), separator);
             if (!values.empty())
             {
                 if (auto&& last = std::strrchr(key.c_str(), separator.value))
@@ -127,7 +137,7 @@ class ConfigNodeExpander
                     auto&& nodes = scope->getNodes(boost::string_ref(key.c_str(), last - key.c_str()));
                     if (!nodes.empty())
                     {
-                        return {last + 1, nodes[0]};
+                        return {last + 1, nodes[0], 0};
                     }
                 }
             }
@@ -187,6 +197,16 @@ public:
 
         for (auto& replacementAt : replacements)
         {
+            // sort the array in order to remove the indicies from the last one
+            std::sort(replacementAt.second.begin(), replacementAt.second.end(),
+                    [](const KeyNode& lhs, const KeyNode& rhs) { return lhs.index > rhs.index; });
+            for (const auto& replacement : replacementAt.second)
+            {
+                if (replacement.node)
+                {
+                    replacementAt.first->eraseValue(replacement.key, replacement.index);
+                }
+            }
             for (const auto& replacement : replacementAt.second)
             {
                 if (replacement.node)

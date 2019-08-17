@@ -11,28 +11,17 @@ namespace detail {
 ConfigNode::node_type ConfigNode::clone() const
 {
     auto cloned = ConfigNode::node_type(new ConfigNode());
-
-    auto currFrom = this->children.get<ordered>().begin();
-    auto endFrom  = this->children.get<ordered>().end();
-
-    while(currFrom != endFrom)
+    for(auto& elem : nodes.get<ordered>())
     {
-        if (auto&& nodeListFrom = boost::get<node_list>(&currFrom->value))
+        node_list nodes;
+        for (auto&& node : elem.value)
         {
-            node_list nodes;
-            for (auto&& node : *nodeListFrom)
-            {
-                nodes.emplace_back(std::move(node->clone()));
-            }
-            cloned->children.get<sequenced>().push_back({currFrom->key, std::move(nodes)});
+            nodes.emplace_back(std::move(node->clone()));
         }
-        else
-        {
-            cloned->children.get<sequenced>().push_back({currFrom->key, currFrom->value});
-        }
-        ++currFrom;
+        cloned->nodes.get<sequenced>().push_back({elem.key, std::move(nodes)});
     }
 
+    cloned->values = values;
     cloned->updateParents();
 
     return cloned;
@@ -40,62 +29,89 @@ ConfigNode::node_type ConfigNode::clone() const
 
 void ConfigNode::overwrite(ConfigNode&& other)
 {
-    auto currMergeTo = this->children.get<ordered>().begin();
-    auto endMergeTo  = this->children.get<ordered>().end();
-
-    auto currMergeFrom = other.children.get<ordered>().begin();
-    auto endMergeFrom  = other.children.get<ordered>().end();
-
-    if(currMergeTo == endMergeTo)
+    if (this->empty())
     {
         *this = std::move(other);
+        return;
     }
 
-    while(currMergeTo != endMergeTo && currMergeFrom != endMergeFrom)
     {
-        if(currMergeTo->key > currMergeFrom->key)
+        auto currMergeTo = this->nodes.get<ordered>().begin();
+        auto endMergeTo  = this->nodes.get<ordered>().end();
+
+        auto currMergeFrom = other.nodes.get<ordered>().begin();
+        auto endMergeFrom  = other.nodes.get<ordered>().end();
+
+        while(currMergeTo != endMergeTo && currMergeFrom != endMergeFrom)
         {
-            currMergeTo = this->children.insert(currMergeTo, {currMergeFrom->key, currMergeFrom->value});
-            ++currMergeTo;
-            ++currMergeFrom;
-        }
-        else
-        if(currMergeTo->key == currMergeFrom->key)
-        {
-            auto&& nodeListTo   = boost::get<node_list>(&currMergeTo->value);
-            auto&& nodeListFrom = boost::get<node_list>(&currMergeFrom->value);
-            if (nodeListTo && nodeListFrom)
+            if(currMergeTo->key > currMergeFrom->key)
             {
-                //NOTE: const_cast is safe here as we are not touching the key
-                auto update = const_cast<node_list*>(nodeListTo);
-                for (size_t i = 0; i < std::min(update->size(), nodeListFrom->size()); ++i)
-                {
-                    (*update)[i]->overwrite(std::move(*(*nodeListFrom)[i]));
-                }
-                for (size_t i = update->size(); i < nodeListFrom->size(); ++i)
-                {
-                    update->emplace_back(std::move((*nodeListFrom)[i]));
-                }
+                currMergeTo = this->nodes.insert(currMergeTo, {currMergeFrom->key, currMergeFrom->value});
+                ++currMergeTo;
+                ++currMergeFrom;
             }
             else
+            if(currMergeTo->key == currMergeFrom->key)
             {
                 //NOTE: const_cast is safe here as we are not touching the key
-                const_cast<node_value_list&>(currMergeTo->value) =
-                    std::move(const_cast<node_value_list&>(currMergeFrom->value));
+                auto update = const_cast<node_list&>(currMergeTo->value);
+                for (size_t i = 0; i < std::min(update.size(), currMergeFrom->value.size()); ++i)
+                {
+                    update[i]->overwrite(std::move(*(currMergeFrom->value[i])));
+                }
+                for (size_t i = update.size(); i < currMergeFrom->value.size(); ++i)
+                {
+                    update.emplace_back(std::move(currMergeFrom->value[i]));
+                }
+                ++currMergeFrom;
+                ++currMergeTo;
             }
-            ++currMergeFrom;
-            ++currMergeTo;
+            else
+            if(currMergeTo->key < currMergeFrom->key)
+            {
+                ++currMergeTo;
+            }
         }
-        else
-        if(currMergeTo->key < currMergeFrom->key)
+
+        for(;currMergeFrom != endMergeFrom; ++currMergeFrom)
         {
-            ++currMergeTo;
+            this->nodes.insert({currMergeFrom->key, currMergeFrom->value});
         }
     }
 
-    for(;currMergeFrom != endMergeFrom; ++currMergeFrom)
     {
-        this->children.insert({currMergeFrom->key, currMergeFrom->value});
+        auto currMergeTo = this->values.get<ordered>().begin();
+        auto endMergeTo  = this->values.get<ordered>().end();
+
+        auto currMergeFrom = other.values.get<ordered>().begin();
+        auto endMergeFrom  = other.values.get<ordered>().end();
+
+        while(currMergeTo != endMergeTo && currMergeFrom != endMergeFrom)
+        {
+            if(currMergeTo->key > currMergeFrom->key)
+            {
+                currMergeTo = this->values.insert(currMergeTo, {currMergeFrom->key, currMergeFrom->value});
+                ++currMergeTo;
+                ++currMergeFrom;
+            }
+            else
+            if(currMergeTo->key == currMergeFrom->key)
+            {
+                const_cast<value_list&>(currMergeTo->value) = std::move(const_cast<value_list&>(currMergeFrom->value));
+                ++currMergeFrom;
+                ++currMergeTo;
+            }
+            else
+            if(currMergeTo->key < currMergeFrom->key)
+            {
+                ++currMergeTo;
+            }
+        }
+
+        for(;currMergeFrom != endMergeFrom; ++currMergeFrom)
+        {
+            this->values.insert({currMergeFrom->key, currMergeFrom->value});
+        }
     }
 
     this->updateParents();

@@ -62,6 +62,13 @@ struct XmlExtension
                     </Settings>
                     <ParametersAlias>%node.Parameters%</ParametersAlias>
                     <LinkAlias>%node.Settings.Link%</LinkAlias>
+                    <LinkArray>
+                        <.>
+                            <Destination>LSE</Destination>
+                            <LinkId>98</LinkId>
+                        </.>
+                        <.>%node..Settings.Link%</.>
+                    </LinkArray>
                 </Gateway>
             </ConfigShould>)";
     }
@@ -112,7 +119,15 @@ struct JsonExtension
                         "Link" : "%node..Parameters%"
                     },
                     "ParametersAlias" : "%node.Parameters%",
-                    "LinkAlias" : "%node.Settings.Link%"
+                    "LinkAlias" : "%node.Settings.Link%",
+                    "LinkArray" :
+                    [
+                        {
+                            "Destination" : "LSE",
+                            "LinkId"      : "98"
+                        },
+                        "%node..Settings.Link%"
+                    ]
                 }
             }})";
     }
@@ -197,6 +212,29 @@ TYPED_TEST(NodeExpanderShould, expandChainOfReferences)
     EXPECT_EQ(std::string("XETRA"), *actual);
 
     actual = scope.template get<std::string>("LinkId");
+    ASSERT_TRUE(static_cast<bool>(actual));
+    EXPECT_EQ(std::string("155"), *actual);
+}
+
+TYPED_TEST(NodeExpanderShould, supportMixingNormalAndNodeElementsInArray)
+{
+    auto scopes = this->config->scopes("ConfigShould.Gateway.LinkArray.");
+
+    ASSERT_EQ(2, scopes.size());
+
+    auto actual = scopes[0].template get<std::string>("Destination");
+    ASSERT_TRUE(static_cast<bool>(actual));
+    EXPECT_EQ(std::string("LSE"), *actual);
+
+    actual = scopes[0].template get<std::string>("LinkId");
+    ASSERT_TRUE(static_cast<bool>(actual));
+    EXPECT_EQ(std::string("98"), *actual);
+
+    actual = scopes[1].template get<std::string>("Destination");
+    ASSERT_TRUE(static_cast<bool>(actual));
+    EXPECT_EQ(std::string("XETRA"), *actual);
+
+    actual = scopes[1].template get<std::string>("LinkId");
     ASSERT_TRUE(static_cast<bool>(actual));
     EXPECT_EQ(std::string("155"), *actual);
 }

@@ -13,6 +13,7 @@
 
 //std
 #include <cassert>
+#include <stdexcept>
 
 namespace dconfig {
 
@@ -37,7 +38,7 @@ class ConfigTemplateExpander
             assert(result);
         }
 
-        void visit(detail::ConfigNode& parent, const std::string& key, std::string&)
+        void visit(detail::ConfigNode& parent, const std::string& key, size_t, std::string&)
         {
             using namespace boost::xpressive;
 
@@ -49,7 +50,7 @@ class ConfigTemplateExpander
             }
         }
 
-        void visit(detail::ConfigNode& parent, const std::string& key, detail::ConfigNode& node)
+        void visit(detail::ConfigNode& parent, const std::string& key, size_t, detail::ConfigNode& node)
         {
             using namespace boost::xpressive;
 
@@ -59,7 +60,7 @@ class ConfigTemplateExpander
                 assert(what.size()>1);
                 result->emplace_back(Replacement{key, std::string(what[1].str().c_str()), &parent});
             }
-            else // TODO: Should I add support for nested templates?
+            else // TODO: Add support for nested templates?
             {
                 node.accept(*this);
             }
@@ -71,23 +72,30 @@ class ConfigTemplateExpander
     };
 
 public:
-    explicit ConfigTemplateExpander(const Separator& separator)
+
+    explicit ConfigTemplateExpander(const Separator& separator, const char* prefix = "template")
         : separator(separator)
+        , prefix(std::string("%") + prefix)
     {
+        this->prefix += separator.value;
     }
 
     void operator()(detail::ConfigNode& root)
     {
         using namespace boost::xpressive;
 
-        sregex match = *(blank | _ln) >> "%template." >> (s1 = -+_) >> "%" >> *(blank | _ln);
+        sregex match =
+                *(blank | _ln) >>
+                (prefix.c_str()) >>
+                (s1 = -+_) >>
+                "%" >> *(blank | _ln);
 
         std::vector<Replacement> replacements;
         root.accept(Visitor(&root, &match, &replacements));
         for (auto& replacement : replacements)
         {
             const auto& with = root.getNodes(replacement.with, separator);
-            if (with.size() == 1)
+            if (with.size() >= 1)
             {
                 auto&& clone = with[0]->clone();
                 auto&& overwrite = replacement.at->getNodes(boost::string_ref(replacement.key));
@@ -97,11 +105,17 @@ public:
                 }
                 replacement.at->swap(std::move(*clone));
             }
+            else
+            {
+                throw std::invalid_argument(
+                    std::string("Could not resolve \"") + replacement.key + "\"");
+            }
         }
     }
 
 private:
     Separator separator;
+    std::string prefix;
 };
 
 } //namespace dconfig

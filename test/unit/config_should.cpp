@@ -324,6 +324,20 @@ TYPED_TEST(ConfigShould, supportIntegerBooleanValues)
     EXPECT_FALSE(*this->config->template get<bool>("ConfigShould.IntFalse"));
 }
 
+TYPED_TEST(ConfigShould, rethrowBadCastAsInvalidArgument)
+{
+    this->loadConfig();
+
+    EXPECT_THROW(this->config->template get<int>("ConfigShould.System.SessionFile"), std::invalid_argument);
+}
+
+TYPED_TEST(ConfigShould, rethrowBadCastAsInvalidArgument2)
+{
+    this->loadConfig();
+
+    EXPECT_THROW(this->config->template getAll<int>("ConfigShould.System.SessionFile"), std::invalid_argument);
+}
+
 // TYPED_TEST(ConfigShould, getValuesWithAlternatives)
 // {
 //     this->loadConfig();

@@ -11,9 +11,11 @@
 //boost
 #include <boost/lexical_cast.hpp>
 #include <boost/optional.hpp>
+#include <boost/type_index.hpp>
 
 //std
 #include <vector>
+#include <exception>
 
 namespace dconfig {
 
@@ -34,7 +36,16 @@ public:
             auto value = get<std::string>(path);
             if (value)
             {
-                return boost::lexical_cast<T>(*value);
+                try
+                {
+                    return boost::lexical_cast<T>(*value);
+                }
+                catch(boost::bad_lexical_cast& ex)
+                {
+                    throw std::invalid_argument(
+                        std::string("cannot convert \"") + *value + "\" (path=" + path + ")"
+                        " to type " + boost::typeindex::type_id<T>().pretty_name());
+                }
             }
         }
         return boost::optional<T>();
@@ -52,10 +63,22 @@ public:
         std::vector<T> result;
         if(node)
         {
-            auto&& values = getAll<std::string>(path);
-            for (const auto& value : values)
+            size_t index = 0;
+            for (const auto& value : getAll<std::string>(path))
             {
-                result.emplace_back(boost::lexical_cast<T>(value));
+                try
+                {
+                    result.emplace_back(boost::lexical_cast<T>(value));
+                    ++index;
+                }
+                catch(boost::bad_lexical_cast& ex)
+                {
+                    throw std::invalid_argument(
+                        std::string("cannot convert \"") + value + "\""
+                        " (path=" + path + "[" + std::to_string(index) + "])"
+                        " to type " + boost::typeindex::type_id<T>().pretty_name());
+                }
+
             }
         }
 

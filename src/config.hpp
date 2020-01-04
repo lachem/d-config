@@ -42,9 +42,7 @@ public:
                 }
                 catch(boost::bad_lexical_cast& ex)
                 {
-                    throw std::invalid_argument(
-                        std::string("cannot convert \"") + *value + "\" (path=" + path + ")"
-                        " to type " + boost::typeindex::type_id<T>().pretty_name());
+                    throw std::invalid_argument(conversionError<T>(*value, std::string(path)));
                 }
             }
         }
@@ -73,12 +71,9 @@ public:
                 }
                 catch(boost::bad_lexical_cast& ex)
                 {
-                    throw std::invalid_argument(
-                        std::string("cannot convert \"") + value + "\""
-                        " (path=" + path + "[" + std::to_string(index) + "])"
-                        " to type " + boost::typeindex::type_id<T>().pretty_name());
+                    auto&& indexedPath = std::string(path) + "[" + std::to_string(index) + "]";
+                    throw std::invalid_argument(conversionError<T>(value, std::move(indexedPath)));
                 }
-
             }
         }
 
@@ -150,10 +145,17 @@ public:
 private:
     friend class ConfigBuilder;
 
-    Config(const detail::ConfigNode::node_type& node, const Separator& separator)
+    Config(const detail::ConfigNode::node_type& node, const  Separator& separator)
         : separator(separator)
         , node(node)
     {
+    }
+
+    template<typename T>
+    std::string conversionError(const std::string& value, std::string&& path) const
+    {
+        return std::string("cannot convert \"") + value + "\" (path=" + path + ")"
+               " to type " + boost::typeindex::type_id<T>().pretty_name();
     }
 
     Separator separator;

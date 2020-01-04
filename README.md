@@ -25,7 +25,8 @@ asssert(config.get<std::string>("Configuration.Component1.name") == scoped.get<s
     - [Environment Access](#environment-access)
     - [Value Aliasing](#value-aliasing)
     - [Node Aliasing](#node-aliasing)
-    - [Note About Arrays](#note-about-arrays)
+    - [Relative Paths](#relative-paths)
+    - [Array Support](#array-support)
   - [License](#license)
 
 ## Requirements
@@ -165,9 +166,70 @@ Becomes
   }
 }
 ```
-**Note** | Aliased nodes are references and not copies, yielding better runtime performance and more compact representation in memory.
+**Note** | Aliased nodes are references and not copies, thus yielding better runtime performance and more compact representation in memory.
 
-### Note About Arrays
+### Relative Paths
+Paths to nodes and properties can be provided in two ways, absolute and relative. Aboslute paths require the user to specify complete set of dot separated node names that lead to the referenced property or node (see prior examples). Relative paths instead allow the user to specify referenced property or node in relation to reference position. The number of dots after function specifier (i.e. ```%param``` or ```%node```) denote how many levels up in the configuration tree to go.
+```json
+{
+  "Component" :
+  {
+    "Config":
+    {
+      "Identification":
+      {
+        "User" : "username",
+        "Host" : "hostname"
+      }
+    },
+    "IOComponent":
+    {
+      "Address" :
+      {
+        "node" : "127.0.0.1",
+        "port" : "27800"
+      },
+      "Destination" : "%config.Address.node%:%config.Address.port%",
+      "Identification" : "%node..Config.Identification%",
+      "Source" : "%config..Config.Identification.Host%"
+    }
+  }
+}
+```
+Becomes
+```json
+{
+  "Component" :
+  {
+    "Config":
+    {
+      "Identification":
+      {
+        "User" : "username",
+        "Host" : "hostname"
+      }
+    },
+    "IOComponent":
+    {
+      "Address" :
+      {
+        "node" : "127.0.0.1",
+        "port" : "27800"
+      },
+      "Destination" : "127.0.0.1:27800",
+      "Identification" :
+      {
+        "User" : "username",
+        "Host" : "hostname"
+      },
+      "Source" : "hostname"
+    }
+  }
+}
+```
+**Note** | Relative paths take precedence in case of ambiguity.
+
+### Array Support
 The api is the same for XML and JSON files with one exception namely arrays. As there is no notion of an array in XML the syntax for array in XML is slightly different than for json and requires the usage of special tag character:
 ```cpp
 std::vector<int32_t> value = confg.getAll<int32_t>("Config.Array.");

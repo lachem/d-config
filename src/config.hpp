@@ -23,6 +23,14 @@ namespace dconfig {
 class Config
 {
 public:
+    template<typename T, typename P1, typename P2, typename... P>
+    boost::optional<T> get(P1&& p1, P2&& p2, P&&... p) const
+    {
+        if (auto&& result = this->get<T>(p1))
+            return result;
+        return this->get<T>(std::forward<P2>(p2), std::forward<P>(p)...);
+    }
+
     template<typename T>
     boost::optional<T> get(const std::string& path) const
     {
@@ -48,6 +56,15 @@ public:
             }
         }
         return boost::optional<T>();
+    }
+
+    template<typename T, typename P1, typename P2, typename... P>
+    std::vector<T> getAll(P1&& p1, P2&& p2, P&&... p) const
+    {
+        auto&& result = this->getAll<T>(p1);
+        if (!result.empty())
+            return result;
+        return this->getAll<T>(std::forward<P2>(p2), std::forward<P>(p)...);
     }
 
     template<typename T>
@@ -81,6 +98,15 @@ public:
         return result;
     }
 
+    template<typename P1, typename P2, typename... P>
+    const std::vector<std::string>& getRef(P1&& p1, P2&& p2, P&&... p) const
+    {
+        const auto& result = this->getRef(p1);
+        if (!result.empty())
+            return result;
+        return this->getRef(std::forward<P2>(p2), std::forward<P>(p)...);
+    }
+
     const std::vector<std::string>& getRef(const std::string& path) const
     {
         return this->getRef(path.c_str());
@@ -92,6 +118,14 @@ public:
         return (node)
             ? node->getValues(path, separator)
             : empty;
+    }
+
+    template<typename P1, typename P2, typename... P>
+    Config scope(P1&& p1, P2&& p2, P&&... p) const
+    {
+        if (auto&& result = this->scope(p1))
+            return result;
+        return this->scope(std::forward<P2>(p2), std::forward<P>(p)...);
     }
 
     Config scope(const std::string& path) const
@@ -110,6 +144,15 @@ public:
             }
         }
         return Config(nullptr, separator);
+    }
+
+    template<typename P1, typename P2, typename... P>
+    std::vector<Config> scopes(P1&& p1, P2&& p2, P&&... p) const
+    {
+        auto&& result = this->scopes(p1);
+        if (!result.empty())
+            return result;
+        return this->scopes(std::forward<P2>(p2), std::forward<P>(p)...);
     }
 
     std::vector<Config> scopes(const std::string& path) const

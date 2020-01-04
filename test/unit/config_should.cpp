@@ -230,7 +230,7 @@ TYPED_TEST(ConfigShould, returnMultipleParameters)
     EXPECT_EQ(std::string("Value3"),values[2]);
 }
 
-TYPED_TEST(ConfigShould, supportJsonArrays)
+TYPED_TEST(ConfigShould, supportArrays)
 {
     this->loadConfig();
 
@@ -244,7 +244,7 @@ TYPED_TEST(ConfigShould, supportJsonArrays)
     EXPECT_EQ(std::string("Elem3"),values[2]);
 }
 
-TYPED_TEST(ConfigShould, supportJsonArrays2)
+TYPED_TEST(ConfigShould, supportArraysFromScope)
 {
     this->loadConfig();
 
@@ -336,21 +336,77 @@ TYPED_TEST(ConfigShould, rethrowBadCastAsInvalidArgument2)
     EXPECT_THROW(this->config->template getAll<int>("ConfigShould.System.SessionFile"), std::invalid_argument);
 }
 
-// TYPED_TEST(ConfigShould, getValuesWithAlternatives)
-// {
-//     this->loadConfig();
-//     auto expected = std::string("Enabled");
-//     auto actual = this->config->template get<std::string>(
-//         alternatives(
-//             "ConfigShould.non-existent",
-//             "ConfigShould.System.non-existent",
-//             "ConfigShould.System.SessionStatus"
-//         )
-//     );
+TYPED_TEST(ConfigShould, provideValuesViaAlternativePaths)
+{
+    this->loadConfig();
+    auto expected = std::string("Enabled");
 
-//     EXPECT_EQ(expected, actual);
-// }
+    auto actual = this->config->template get<std::string>(
+        "ConfigShould.non-existent",
+        "ConfigShould.System.non-existent",
+        "ConfigShould.System.SessionStatus"
+    );
 
+    EXPECT_EQ(expected, actual);
+}
+
+TYPED_TEST(ConfigShould, provideArraysViaAlternativePaths)
+{
+    this->loadConfig();
+
+    auto&& values = this->config->template getAll<std::string>(
+        "ConfigShould.non-existent.",
+        "ConfigShould.Array.");
+
+    ASSERT_EQ(3, values.size());
+
+    EXPECT_EQ(std::string("Elem1"),values[0]);
+    EXPECT_EQ(std::string("Elem2"),values[1]);
+    EXPECT_EQ(std::string("Elem3"),values[2]);
+}
+
+TYPED_TEST(ConfigShould, provideRefsViaAlternativePaths)
+{
+    this->loadConfig();
+    auto expected = std::string("Enabled");
+
+    const auto& actual = this->config->template getRef(
+        "ConfigShould.non-existent",
+        "ConfigShould.System.SessionStatus",
+        "ConfigShould.System.non-existent");
+
+    ASSERT_EQ(1, actual.size());
+
+    EXPECT_EQ(expected, actual[0]);
+}
+
+TYPED_TEST(ConfigShould, provideScopeViaAlternativePaths)
+{
+    this->loadConfig();
+    auto expected = std::string("Enabled");
+
+    const auto& scope = this->config->scope(
+        "ConfigShould.non-existent",
+        "ConfigShould.System");
+    auto actual = scope.template get<std::string>("SessionStatus");
+
+    ASSERT_TRUE(actual);
+
+    EXPECT_EQ(expected, *actual);
+}
+
+TYPED_TEST(ConfigShould, provideMultipleScopeViaAlternativePaths)
+{
+    this->loadConfig();
+    auto configScopes = this->config->scope("ConfigShould").scopes("non-existent", "Repeated");
+
+    ASSERT_EQ(2, configScopes.size());
+
+    for (auto&& scope : configScopes)
+    {
+        EXPECT_TRUE(scope.template get<std::string>("Rep").get().find("Value") != std::string::npos);
+    }
+}
 
 } // namespace dconfig
 } // namespace test

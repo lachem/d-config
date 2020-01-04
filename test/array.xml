@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<ConfigShould>
+    <Array>
+        <.>Elem1</.>
+        <.>Elem2</.>
+        <.>Elem3</.>
+    </Array>
+    <InjectedArray>
+        <.>%node.ConfigShould%</.>
+        <.>%node.ConfigShould%</.>
+    </InjectedArray>
+</ConfigShould>

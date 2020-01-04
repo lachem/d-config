@@ -23,7 +23,6 @@ namespace {
 
 struct XmlExtension
 {
-    static constexpr bool supportsArrays() { return false; }
     static constexpr const char* contents()
     {
         return R"(
@@ -76,7 +75,6 @@ struct XmlExtension
 
 struct JsonExtension
 {
-    static constexpr bool supportsArrays() { return true; }
     static constexpr const char* contents()
     {
         return R"({

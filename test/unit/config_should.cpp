@@ -24,13 +24,11 @@ namespace dconfig {
 struct XmlExtension
 {
     static const char* name() { return "xml"; }
-    static bool supportsArrays() { return false; }
 };
 
 struct JsonExtension
 {
     static const char* name() { return "json"; }
-    static bool supportsArrays() { return true; }
 };
 
 template<typename Extension>
@@ -67,7 +65,7 @@ struct TextConfigLoader
         std::vector<std::string> files;
         files.push_back(loadFile(std::string("test/config.") + Extension::name()));
         files.push_back(loadFile(std::string("test/config_override.") + Extension::name()));
-        files.push_back(loadFile(std::string("test/array.json")));
+        files.push_back(loadFile(std::string("test/array.") + Extension::name()));
 
         config.reset(new ::dconfig::Config(::dconfig::DefaultBuilder(separator).build(std::move(files))));
     }
@@ -93,7 +91,7 @@ struct FileConfigLoader
         std::vector<std::string> files;
         files.push_back(std::string("test/config.") + Extension::name());
         files.push_back(std::string("test/config_override.") + Extension::name());
-        files.push_back(std::string("test/array.json"));
+        files.push_back(std::string("test/array.") + Extension::name());
 
         config.reset(new ::dconfig::Config(::dconfig::FileFactory(files, separator).create()));
     }
@@ -104,7 +102,6 @@ struct FileConfigLoader
 template <typename T>
 struct ConfigShould : public Test, public T
 {
-    bool supportsArrays() { return T::extension::supportsArrays(); }
 };
 
 using TestTypes = ::testing::Types<

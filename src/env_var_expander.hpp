@@ -16,7 +16,7 @@
 
 namespace dconfig {
 
-/// Fulfills prebuild expander conept
+/// Fulfills prebuild expander concept
 struct EnvVarExpander
 {
 private:

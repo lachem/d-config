@@ -38,7 +38,7 @@ class ConfigNodeExpander
                 const boost::xpressive::sregex* match,
                 replacement_container* result,
                 Separator separator,
-                std::string* levelUp)
+                const std::string* levelUp)
             : root(root)
             , match(match)
             , result(result)
@@ -148,7 +148,7 @@ class ConfigNodeExpander
         const boost::xpressive::sregex* match;
         replacement_container* result;
         Separator separator;
-        std::string* levelUp;
+        const std::string* levelUp;
     };
 
 public:
@@ -168,7 +168,7 @@ public:
         }
     }
 
-    void operator()(detail::ConfigNode& root)
+    void operator()(detail::ConfigNode& root) const
     {
         using namespace boost::xpressive;
 

@@ -22,7 +22,11 @@ class ConfigParamExpander
 {
     struct RegexExpander
     {
-        RegexExpander(const detail::ConfigNode* root, const detail::ConfigNode* node, const Separator& separator, std::string* levelUp)
+        RegexExpander(
+            const detail::ConfigNode* root,
+            const detail::ConfigNode* node,
+            const Separator& separator,
+            const std::string* levelUp)
             : root(root)
             , node(node)
             , separator(separator)
@@ -80,12 +84,16 @@ class ConfigParamExpander
         const detail::ConfigNode* root;
         const detail::ConfigNode* node;
         Separator separator;
-        std::string* levelUp;
+        const std::string* levelUp;
     };
 
     struct Visitor
     {
-        Visitor(detail::ConfigNode* root, const boost::xpressive::sregex* match, const Separator& separator, std::string* levelUp)
+        Visitor(
+            detail::ConfigNode* root,
+            const boost::xpressive::sregex* match,
+            const Separator& separator,
+            const std::string* levelUp)
             : match(match)
             , root(root)
             , separator(separator)
@@ -120,7 +128,7 @@ class ConfigParamExpander
         const boost::xpressive::sregex* match;
         detail::ConfigNode* root;
         Separator separator;
-        std::string* levelUp;
+        const std::string* levelUp;
     };
 
 public:
@@ -140,7 +148,7 @@ public:
         }
     }
 
-    void operator()(detail::ConfigNode& root)
+    void operator()(detail::ConfigNode& root) const
     {
         using namespace boost::xpressive;
 

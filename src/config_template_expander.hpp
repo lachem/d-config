@@ -2,6 +2,7 @@
 // Distributed under the Boost Software License, Version 1.0.
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
+#pragma once
 
 //local
 #include <separator.hpp>
@@ -80,7 +81,7 @@ public:
         this->prefix += separator.value;
     }
 
-    void operator()(detail::ConfigNode& root)
+    void operator()(detail::ConfigNode& root) const
     {
         using namespace boost::xpressive;
 

@@ -79,16 +79,16 @@ public:
     using value_list = std::vector<value_type>;
     using node_list  = std::vector<node_type>;
 
-    bool empty() const
-    {
-        return values.empty() && nodes.empty();
-    }
-
     template<typename S>
-    friend S& operator << (S&& stream, const ConfigNode& node)
+    friend S& operator<<(S&& stream, const ConfigNode& node)
     {
         node.print(stream, "");
         return stream;
+    }
+
+    bool empty() const
+    {
+        return values.empty() && nodes.empty();
     }
 
     template<typename T>

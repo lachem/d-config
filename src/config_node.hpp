@@ -39,13 +39,6 @@ class ConfigNode : public std::enable_shared_from_this<ConfigNode>
     struct ordered {};
     struct referenced {};
 
-public:
-    using value_type = std::string;
-    using node_type  = std::shared_ptr<ConfigNode>;
-
-    using value_list = std::vector<value_type>;
-    using node_list  = std::vector<node_type>;
-
     template<typename List>
     struct ElementType
     {
@@ -78,6 +71,13 @@ public:
                 , typename ElementType<List>::HashByKeyRef>
             , boost::multi_index::sequenced
                 < boost::multi_index::tag<sequenced>> >>;
+
+public:
+    using value_type = std::string;
+    using node_type  = std::shared_ptr<ConfigNode>;
+
+    using value_list = std::vector<value_type>;
+    using node_list  = std::vector<node_type>;
 
     bool empty() const
     {

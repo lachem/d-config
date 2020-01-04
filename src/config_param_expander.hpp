@@ -25,10 +25,10 @@ class ConfigParamExpander
     struct RegexExpander
     {
         RegexExpander(
-            const detail::ConfigNode* root,
-            const detail::ConfigNode* node,
-            const Separator& separator,
-            const std::string* levelUp)
+                const detail::ConfigNode* root,
+                const detail::ConfigNode* node,
+                const Separator& separator,
+                const std::string* levelUp)
             : root(root)
             , node(node)
             , separator(separator)
@@ -92,10 +92,10 @@ class ConfigParamExpander
     struct Visitor
     {
         Visitor(
-            detail::ConfigNode* root,
-            const boost::xpressive::sregex* match,
-            const Separator& separator,
-            const std::string* levelUp)
+                detail::ConfigNode* root,
+                const boost::xpressive::sregex* match,
+                const Separator& separator,
+                const std::string* levelUp)
             : match(match)
             , root(root)
             , separator(separator)

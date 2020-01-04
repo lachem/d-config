@@ -77,7 +77,6 @@ class ConfigNodeExpander
                     }
                 }
 
-
                 if (addKeyNode(scope, &parent, key, index, what[3].str()))
                     return;
 

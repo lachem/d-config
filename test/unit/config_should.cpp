@@ -23,12 +23,12 @@ namespace dconfig {
 
 struct XmlExtension
 {
-    static const char* name() { return "xml"; }
+    constexpr static const char* name = "xml";
 };
 
 struct JsonExtension
 {
-    static const char* name() { return "json"; }
+    constexpr static const char* name = "json";
 };
 
 template<typename Extension>
@@ -38,8 +38,9 @@ struct InitConfigLoader
 
     void loadConfig(const ::dconfig::Separator& separator = ::dconfig::Separator())
     {
-        auto configFile         = std::string("test/config.") + Extension::name();
-        auto configFileOverride = std::string("test/config_override.") + Extension::name();
+        auto configFile         = std::string("test/config.") + Extension::name;
+        auto configFileOverride = std::string("test/config_override.") + Extension::name;
+        auto arrayFile          = std::string("test/array.") + Extension::name;
 
         int argc = 5;
         char* argv[5];
@@ -47,7 +48,7 @@ struct InitConfigLoader
         argv[1] = (char*)"--config";
         argv[2] = (char*)configFile.c_str();
         argv[3] = (char*)configFileOverride.c_str();
-        argv[4] = (char*)"test/array.json";
+        argv[4] = (char*)arrayFile.c_str();
 
         config.reset(new ::dconfig::Config(::dconfig::InitFactory(argc, argv, separator).create()));
     }
@@ -63,9 +64,9 @@ struct TextConfigLoader
     void loadConfig(const ::dconfig::Separator& separator = ::dconfig::Separator())
     {
         std::vector<std::string> files;
-        files.push_back(loadFile(std::string("test/config.") + Extension::name()));
-        files.push_back(loadFile(std::string("test/config_override.") + Extension::name()));
-        files.push_back(loadFile(std::string("test/array.") + Extension::name()));
+        files.push_back(loadFile(std::string("test/config.") + Extension::name));
+        files.push_back(loadFile(std::string("test/config_override.") + Extension::name));
+        files.push_back(loadFile(std::string("test/array.") + Extension::name));
 
         config.reset(new ::dconfig::Config(::dconfig::DefaultBuilder(separator).build(std::move(files))));
     }
@@ -89,9 +90,9 @@ struct FileConfigLoader
     void loadConfig(const ::dconfig::Separator& separator = ::dconfig::Separator())
     {
         std::vector<std::string> files;
-        files.push_back(std::string("test/config.") + Extension::name());
-        files.push_back(std::string("test/config_override.") + Extension::name());
-        files.push_back(std::string("test/array.") + Extension::name());
+        files.push_back(std::string("test/config.") + Extension::name);
+        files.push_back(std::string("test/config_override.") + Extension::name);
+        files.push_back(std::string("test/array.") + Extension::name);
 
         config.reset(new ::dconfig::Config(::dconfig::FileFactory(files, separator).create()));
     }

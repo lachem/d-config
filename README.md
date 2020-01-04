@@ -6,6 +6,7 @@ A library meant to ease system configuration management supporting:
 * configuration scoping
 * expanding environment variables
 * expanding internal value aliases
+* referencing internal config trees
 ```cpp
 dconfig::Config config = dconfig::FileFactory({"config_cmp1.json", "config_cmp2.xml", "overrides.json"}).create();
 dconfig::Config scoped = config.scope("Configuration.Component1");
@@ -109,7 +110,7 @@ In certain cases it is necessary to repeat same value inside the config in multi
   }
 }
 ```
-Becomes (given USER=username, HOST=hostname):
+Becomes (given USER=username, HOST=hostname)
 ```json
 {
   "Config":
@@ -143,7 +144,7 @@ While value aliasing is a useful tool to reference other configuration elements,
   }
 }
 ```
-Becomes:
+Becomes
 ```json
 {
   "Config":

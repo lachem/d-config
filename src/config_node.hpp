@@ -144,29 +144,6 @@ public:
         }
     }
 
-    //FIXME: getValues and getNodes are somewhat incosistent, sometimes they are recursive
-    //       and sometimes they just look into immediate children. We need to somehow
-    //       distinguish one from the other api-wise
-    template<typename... K>
-    const value_list& getValues(const boost::string_ref& key1, const boost::string_ref& key2, K&&... keys) const
-    {
-        auto&& nodes = getNodes(key1);
-        return (!nodes.empty())
-            ? nodes[0]->getValues(key2, keys...)
-            : noValues();
-    }
-
-    const value_list& getValues(const boost::string_ref& key) const
-    {
-        auto&& child = values.get<referenced>().find(key);
-        if (child != values.get<referenced>().end())
-        {
-            return child->value;
-        }
-
-        return noValues();
-    }
-
     const value_list& getValues(const char* key, Separator separator) const
     {
         if (key)
@@ -195,23 +172,23 @@ public:
     }
 
     template<typename... K>
-    const node_list& getNodes(const boost::string_ref& key1, const boost::string_ref& key2, K&&... keys) const
+    const value_list& getValues(const boost::string_ref& key1, const boost::string_ref& key2, K&&... keys) const
     {
         auto&& nodes = getNodes(key1);
         return (!nodes.empty())
-            ? nodes[0]->getNodes(key2, keys...)
-            : noNodes();
+            ? nodes[0]->getValues(key2, keys...)
+            : noValues();
     }
 
-    const node_list& getNodes(const boost::string_ref& key) const
+    const value_list& getValues(const boost::string_ref& key) const
     {
-        auto&& child = nodes.get<referenced>().find(key);
-        if (child != nodes.get<referenced>().end())
+        auto&& child = values.get<referenced>().find(key);
+        if (child != values.get<referenced>().end())
         {
             return child->value;
         }
 
-        return noNodes();
+        return noValues();
     }
 
     const node_list& getNodes(const char* key, Separator separator) const
@@ -236,10 +213,29 @@ public:
         return noNodes();
     }
 
-
     const node_list& getNodes(const std::string& key, Separator separator) const
     {
         return getNodes(key.c_str(), separator);
+    }
+
+    template<typename... K>
+    const node_list& getNodes(const boost::string_ref& key1, const boost::string_ref& key2, K&&... keys) const
+    {
+        auto&& nodes = getNodes(key1);
+        return (!nodes.empty())
+            ? nodes[0]->getNodes(key2, keys...)
+            : noNodes();
+    }
+
+    const node_list& getNodes(const boost::string_ref& key) const
+    {
+        auto&& child = nodes.get<referenced>().find(key);
+        if (child != nodes.get<referenced>().end())
+        {
+            return child->value;
+        }
+
+        return noNodes();
     }
 
     const node_type& getParent() const

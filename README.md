@@ -69,11 +69,11 @@ Config class provides two ways of accessing values of a field ```Config::get<T>(
 
 In case of single element value:
 ```cpp
-boost::optional<int32_t> value = confg.get<int32_t>("dot.separated.path.to.element");
+boost::optional<int32_t> value = config.get<int32_t>("dot.separated.path.to.element");
 ```
 In case of multiple elements with the same name:
 ```cpp
-std::vector<int32_t> value = confg.getAll<int32_t>("dot.separated.path.to.repeated.element");
+std::vector<int32_t> value = config.getAll<int32_t>("dot.separated.path.to.repeated.element");
 ```
 
 ### Config Scoping
@@ -232,7 +232,7 @@ Becomes
 ### Array Support
 The api is the same for XML and JSON files with one exception namely arrays. As there is no notion of an array in XML the syntax for array in XML is slightly different than for json and requires the usage of special tag character:
 ```cpp
-std::vector<int32_t> value = confg.getAll<int32_t>("Config.Array.");
+std::vector<int32_t> value = config.getAll<int32_t>("Config.Array.");
 ```
 Corresponding json file:
 ```json

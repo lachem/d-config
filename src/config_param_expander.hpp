@@ -43,34 +43,19 @@ class ConfigParamExpander
         {
             assert(what.size()>3);
 
-            auto scope = root;
-            if (!what[1].str().empty())
+            auto scope = resolveScope(what);
+            if (scope && what.size() >= 4)
             {
-                scope = node;
-            }
-            if (!what[2].str().empty())
-            {
-                scope = node;
-                auto count = (what[2].str().size() / levelUp->size());
-                for (size_t i = 0; i < count && scope; ++i)
-                {
-                    scope = scope->getParent() ? scope->getParent().get() : nullptr;
-                }
-            }
-
-            if (scope)
-            {
-                auto&& values = scope->getValues(what[3].str().c_str(), separator);
+                auto&& path = what[3].str();
+                auto&& values = scope->getValues(path.c_str(), separator);
                 if (!values.empty())
                 {
                     return values[0];
                 }
 
-                //for backward compatiblity fallback to node scope
-                assert(node);
                 if (scope == root)
                 {
-                    auto&& values = node->getValues(what[3].str().c_str(), separator);
+                    auto&& values = node->getValues(path.c_str(), separator);
                     if (!values.empty())
                     {
                         return values[0];
@@ -79,9 +64,28 @@ class ConfigParamExpander
             }
 
             throw std::invalid_argument("");
+        }
 
-            static const std::string empty;
-            return empty;
+    private:
+        const detail::ConfigNode* resolveScope(const boost::xpressive::smatch& what) const
+        {
+            if (what.size() < 3)
+                return nullptr;
+
+            auto&& currentLevel = what[1].str();
+            auto&& parentLevel = what[2].str();
+
+            auto scope = currentLevel.empty() && parentLevel.empty() ? root : node;
+            if (!parentLevel.empty())
+            {
+                auto count = (parentLevel.size() / levelUp->size());
+                for (size_t i = 0; i < count && scope; ++i)
+                {
+                    scope = scope->getParent() ? scope->getParent().get() : nullptr;
+                }
+            }
+
+            return scope;
         }
 
         const detail::ConfigNode* root;
@@ -109,16 +113,15 @@ class ConfigParamExpander
 
         void visit(detail::ConfigNode& parent, const std::string& key, size_t index, std::string& value)
         {
-            using namespace boost::xpressive;
-
             try
             {
-                value = regex_replace(value, *match, RegexExpander(root, &parent, separator, levelUp));
+                value = boost::xpressive::regex_replace(value, *match, RegexExpander(root, &parent, separator, levelUp));
             }
             catch (const std::invalid_argument&)
             {
                 throw std::invalid_argument(
-                        std::string("Could not find \"") + value + "\" to inject at \"" +
+                        std::string("Could not find \"") +
+                        value + "\" to inject at \"" +
                         key + "[" + std::to_string(index) + "]\"");
             }
         }

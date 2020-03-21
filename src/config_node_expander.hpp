@@ -59,33 +59,21 @@ class ConfigNodeExpander
             smatch what;
             if (regex_match(value, what, *match))
             {
-                assert(what.size() > 3);
-
-                auto scope = root;
-                if (!what[1].str().empty())
+                if (what.size() > 3)
                 {
-                    scope = &parent;
+                    auto&& path = what[3].str();
+                    auto scope = resolveScope(what, &parent);
+                    if (scope && addKeyNode(scope, &parent, key, index, path))
+                        return;
+
+                    //for backward compatiblity fallback to node scope
+                    if (scope == root && addKeyNode(&parent, &parent, key, index, path))
+                        return;
                 }
-
-                if (!what[2].str().empty())
-                {
-                    scope = &parent;
-                    auto count = (what[2].str().size() / levelUp->size());
-                    for (size_t i = 0; i < count && scope; ++i)
-                    {
-                        scope = scope->getParent() ? scope->getParent().get() : nullptr;
-                    }
-                }
-
-                if (scope && addKeyNode(scope, &parent, key, index, what[3].str()))
-                    return;
-
-                //for backward compatiblity fallback to node scope
-                if (scope == root && addKeyNode(&parent, &parent, key, index, what[3].str()))
-                    return;
 
                 throw std::invalid_argument(
-                    std::string("Could not find \"") + value + "\" to inject at \"" +
+                    std::string("Could not find \"") +
+                    value + "\" to inject at \"" +
                     key + "[" + std::to_string(index) + "]\"");
             }
         }
@@ -96,9 +84,30 @@ class ConfigNodeExpander
         }
 
     private:
+        detail::ConfigNode* resolveScope(const boost::xpressive::smatch& what, detail::ConfigNode* node) const
+        {
+            if (what.size() < 3)
+                return nullptr;
+
+            auto&& currentLevel = what[1].str();
+            auto&& parentLevel = what[2].str();
+
+            auto scope = currentLevel.empty() && parentLevel.empty() ? root : node;
+            if (!parentLevel.empty())
+            {
+                auto count = (parentLevel.size() / levelUp->size());
+                for (size_t i = 0; i < count && scope; ++i)
+                {
+                    scope = scope->getParent() ? scope->getParent().get() : nullptr;
+                }
+            }
+
+            return scope;
+        }
+
         bool addKeyNode(detail::ConfigNode* scope, detail::ConfigNode* parent, const std::string& key, size_t index, const std::string& from)
         {
-            auto &&nodes = scope->getNodes(from.c_str(), separator);
+            auto&& nodes = scope->getNodes(from.c_str(), separator);
             if (!nodes.empty())
             {
                 (*result)[parent].emplace_back(KeyNode{key, nodes[0], index});
@@ -111,7 +120,7 @@ class ConfigNodeExpander
                 auto findIt = result->find(baseKeyNode.node.get());
                 if (findIt != result->end())
                 {
-                    for (auto &&replacement : findIt->second)
+                    for (auto&& replacement : findIt->second)
                     {
                         if (replacement.key == baseKeyNode.key)
                         {
@@ -124,8 +133,6 @@ class ConfigNodeExpander
 
             return false;
         }
-
-    private:
 
         //TODO: consider moving this to ConfigNode
         KeyNode getBaseNode(detail::ConfigNode* scope, const std::string& key) const

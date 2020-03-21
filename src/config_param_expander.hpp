@@ -48,32 +48,33 @@ class ConfigParamExpander
             {
                 scope = node;
             }
-
             if (!what[2].str().empty())
             {
                 scope = node;
                 auto count = (what[2].str().size() / levelUp->size());
                 for (size_t i = 0; i < count && scope; ++i)
                 {
-                    scope = scope->getParent().get();
+                    scope = scope->getParent() ? scope->getParent().get() : nullptr;
                 }
             }
 
-            assert(scope);
-            auto&& values = scope->getValues(what[3].str().c_str(), separator);
-            if (!values.empty())
+            if (scope)
             {
-                return values[0];
-            }
-
-            //for backward compatiblity fallback to node scope
-            assert(node);
-            if (scope == root)
-            {
-                auto&& values = node->getValues(what[3].str().c_str(), separator);
+                auto&& values = scope->getValues(what[3].str().c_str(), separator);
                 if (!values.empty())
                 {
                     return values[0];
+                }
+
+                //for backward compatiblity fallback to node scope
+                assert(node);
+                if (scope == root)
+                {
+                    auto&& values = node->getValues(what[3].str().c_str(), separator);
+                    if (!values.empty())
+                    {
+                        return values[0];
+                    }
                 }
             }
 

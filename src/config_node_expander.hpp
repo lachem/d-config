@@ -73,11 +73,11 @@ class ConfigNodeExpander
                     auto count = (what[2].str().size() / levelUp->size());
                     for (size_t i = 0; i < count && scope; ++i)
                     {
-                        scope = scope->getParent().get();
+                        scope = scope->getParent() ? scope->getParent().get() : nullptr;
                     }
                 }
 
-                if (addKeyNode(scope, &parent, key, index, what[3].str()))
+                if (scope && addKeyNode(scope, &parent, key, index, what[3].str()))
                     return;
 
                 //for backward compatiblity fallback to node scope

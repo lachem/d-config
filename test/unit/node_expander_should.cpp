@@ -136,6 +136,8 @@ struct NodeExpanderShould : public Test, public T
 {
     void SetUp() override
     {
+        setenv("RUNTIME", "/root", 1);
+
         config.reset(new ::dconfig::Config(
             ::dconfig::DefaultBuilder().build(
                 { std::string(T::contents()) })));

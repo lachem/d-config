@@ -13,6 +13,7 @@
 
 //std
 #include <string>
+#include <iterator>
 
 namespace dconfig {
 
@@ -36,14 +37,13 @@ public:
     {
         using namespace boost::xpressive;
 
-        sregex env = "%env." >> (s1 = -+_) >> "%";
-        auto it = regex_replace(contents.begin(), contents.begin(), contents.end(), env, RegexExpander());
+        std::string result;
+        result.reserve(contents.size() * 1.05);
 
-        //clear out the spare part of the string to avoid reallaoc inside contents
-        for (; it != contents.end(); ++it)
-        {
-            *it = ' ';
-        }
+        sregex env = "%env." >> (s1 = -+_) >> "%";
+        regex_replace(std::back_inserter(result), contents.begin(), contents.end(), env, RegexExpander());
+
+        std::swap(result, contents);
     }
 };
 

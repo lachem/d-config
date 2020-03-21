@@ -103,6 +103,10 @@ struct FileConfigLoader
 template <typename T>
 struct ConfigShould : public Test, public T
 {
+    void SetUp()
+    {
+        setenv("RUNTIME","/root",1);
+    }
 };
 
 using TestTypes = ::testing::Types<
@@ -132,9 +136,9 @@ TYPED_TEST(ConfigShould, returnSingleParametersByRef)
 
 TYPED_TEST(ConfigShould, expandEnvironmentVariables)
 {
-    setenv("RUNTIME","/root",1);
+    setenv("RUNTIME","/absolute/path/to/root",1);
     this->loadConfig();
-    EXPECT_EQ(std::string("/root/data"), this->config->template get<std::string>("ConfigShould.System.DataPath"));
+    EXPECT_EQ(std::string("/absolute/path/to/root/data"), *this->config->template get<std::string>("ConfigShould.System.DataPath"));
 }
 
 TYPED_TEST(ConfigShould, expandEnvironmentVariables2)

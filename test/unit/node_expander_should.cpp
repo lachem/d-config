@@ -175,13 +175,17 @@ TYPED_TEST(NodeExpanderShould, supportArrayExpansion)
 
     for (const auto& scope : scopes)
     {
-        auto&& values = scope.template getAll<std::string>("Array.");
+        auto&& valuesDirect = scope.template getAll<std::string>("Array.");
+        auto&& valuesScoped = scope.scope("Array").template getAll<std::string>("");
 
-        ASSERT_EQ(3, values.size());
+        for (const auto& values : {valuesDirect, valuesScoped})
+        {
+            ASSERT_EQ(3, values.size());
 
-        EXPECT_EQ(std::string("Elem1"),values[0]);
-        EXPECT_EQ(std::string("Elem2"),values[1]);
-        EXPECT_EQ(std::string("Elem3"),values[2]);
+            EXPECT_EQ(std::string("Elem1"),values[0]);
+            EXPECT_EQ(std::string("Elem2"),values[1]);
+            EXPECT_EQ(std::string("Elem3"),values[2]);
+        }
     }
 }
 

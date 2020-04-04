@@ -27,6 +27,7 @@ asssert(config.get<std::string>("Configuration.Component1.name") == scoped.get<s
     - [Node Aliasing](#node-aliasing)
     - [Relative Paths](#relative-paths)
     - [Array Support](#array-support)
+    - [Optimized Value Access](#optimized-value-access)
   - [License](#license)
 
 ## Requirements
@@ -252,7 +253,7 @@ Corresponding xml file:
 <Config>
   <Array>
     <.>10</.>
-    <.>10</.>
+    <.>20</.>
   </Array>
 </Config>
 ```
@@ -271,6 +272,53 @@ Corresponding json file:
   }
 }
 ```
+Corresponding xml file:
+```xml
+<Config>
+  <ManyArrays>
+    <.>10</.>
+    <.>20</.>
+  </ManyArrays>
+  <ManyArrays>
+    <.>30</.>
+    <.>40</.>
+  </ManyArrays>
+</Config>
+```
+
+### Optimized Value Access
+In dconfig values are stored as vectors of strings (even single values are just one element vectors). It is possible to access those internal arrays of values directly from the API using ```getRef()``` method and avoid copying data.
+
+```cpp
+const std::vector<std::string>& values = config.getRef("Config.SingleValue");
+assert(!values.empty());
+const std::string& value = values[0];
+```
+or
+```cpp
+const std::vector<std::string>& values = config.getRef("Config.ArrayOfValues.");
+```
+Corresponding json file:
+```json
+{
+  "Config":
+  {
+    "SingleValue" : "value",
+    "ArrayOfValues": [ 10, 20 ]
+  }
+}
+```
+Corresponding xml file:
+```xml
+<Config>
+  <SingleValue>value</SingleValue>
+  <ArrayOfValues>
+    <.>10</.>
+    <.>20</.>
+  </ArrayOfValues>
+</Config>
+```
+**Note** | Accessing nodes with getRef() method is not supported and will return an empty array.
 
 ## License
 Copyright Adam Lach 2020. Distributed under the Boost Software License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).

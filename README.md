@@ -232,7 +232,11 @@ Becomes
 ### Array Support
 The api is the same for XML and JSON files with one exception namely arrays. As there is no notion of an array in XML the syntax for array in XML is slightly different than for json and requires the usage of special tag character:
 ```cpp
-std::vector<int32_t> value = config.getAll<int32_t>("Config.Array.");
+std::vector<int32_t> values = config.getAll<int32_t>("Config.Array.");
+```
+or
+```cpp
+std::vector<int32_t> values = config.scope("Config.Array").getAll<int32_t>("");
 ```
 Corresponding json file:
 ```json
@@ -252,7 +256,21 @@ Corresponding xml file:
   </Array>
 </Config>
 ```
-**Note** | Using ```getAll<...>("Config.Element")``` is different from ```getAll<...>("Config.Element.")``` as the former refers to repeated Element tag and the latter to an array under Element tag.
+Using ```getAll<...>("Config.Element")``` is different from ```getAll<...>("Config.Element.")``` as the former refers to repeated Element tag and the latter to an array under Element tag. Distinguishing the two is important to support repeated node arrays, like in the example below:
+```cpp
+for (const auto& scope : config.scopes("Config.ManyArrays"))
+  auto values = scope.getAll<int>("");
+```
+Corresponding json file:
+```json
+{
+  "Config":
+  {
+    "ManyArrays": [ 10, 20 ],
+    "ManyArrays": [ 30, 40 ],
+  }
+}
+```
 
 ## License
-Copyright Adam Lach 2019. Distributed under the Boost Software License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).
+Copyright Adam Lach 2020. Distributed under the Boost Software License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt).

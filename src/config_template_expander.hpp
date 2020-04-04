@@ -48,7 +48,7 @@ class ConfigTemplateExpander
             if (regex_match(key, what, *match))
             {
                 assert(what.size()>1);
-                result->emplace_back(Replacement{key, std::string(what[1].str().c_str()), &parent});
+                result->push_back(Replacement{key, std::string(what[1].str().c_str()), &parent});
             }
         }
 
@@ -60,7 +60,7 @@ class ConfigTemplateExpander
             if (regex_match(key, what, *match))
             {
                 assert(what.size()>1);
-                result->emplace_back(Replacement{key, std::string(what[1].str().c_str()), &parent});
+                result->push_back(Replacement{key, std::string(what[1].str().c_str()), &parent});
             }
             else // TODO: Add support for nested templates?
             {

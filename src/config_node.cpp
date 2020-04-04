@@ -16,7 +16,7 @@ ConfigNode::node_type ConfigNode::clone() const
         node_list nodes;
         for (auto&& node : elem.value)
         {
-            nodes.emplace_back(std::move(node->clone()));
+            nodes.push_back(std::move(node->clone()));
         }
         cloned->nodes.get<sequenced>().push_back({elem.key, std::move(nodes)});
     }
@@ -61,7 +61,7 @@ void ConfigNode::overwrite(ConfigNode&& other)
                 }
                 for (size_t i = update.size(); i < currMergeFrom->value.size(); ++i)
                 {
-                    update.emplace_back(std::move(currMergeFrom->value[i]));
+                    update.push_back(std::move(currMergeFrom->value[i]));
                 }
                 ++currMergeFrom;
                 ++currMergeTo;

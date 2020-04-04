@@ -84,7 +84,7 @@ public:
             {
                 try
                 {
-                    result.emplace_back(boost::lexical_cast<T>(value));
+                    result.push_back(boost::lexical_cast<T>(value));
                     ++index;
                 }
                 catch(boost::bad_lexical_cast& ex)
@@ -168,7 +168,7 @@ public:
             const auto& nodes = node->getNodes(path, separator);
             for (const auto& sub : nodes)
             {
-                result.emplace_back(Config(sub, separator));
+                result.push_back(Config(sub, separator));
             }
         }
         return result;

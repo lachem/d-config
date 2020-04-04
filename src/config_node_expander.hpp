@@ -110,7 +110,7 @@ class ConfigNodeExpander
             auto&& nodes = scope->getNodes(from.c_str(), separator);
             if (!nodes.empty())
             {
-                (*result)[parent].emplace_back(KeyNode{key, nodes[0], index});
+                (*result)[parent].push_back(KeyNode{key, nodes[0], index});
                 return true;
             }
 
@@ -119,7 +119,7 @@ class ConfigNodeExpander
                 auto&& values = scope->getValues(from.c_str(), separator);
                 if (values.size() == 1 && values[0].empty())
                 {
-                    (*result)[parent].emplace_back(KeyNode{key, detail::ConfigNode::create(), index});
+                    (*result)[parent].push_back(KeyNode{key, detail::ConfigNode::create(), index});
                     return true;
                 }
             }
@@ -134,7 +134,7 @@ class ConfigNodeExpander
                     {
                         if (replacement.key == baseKeyNode.key)
                         {
-                            (*result)[parent].emplace_back(KeyNode{key, replacement.node, index});
+                            (*result)[parent].push_back(KeyNode{key, replacement.node, index});
                             return true;
                         }
                     }

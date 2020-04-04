@@ -267,7 +267,7 @@ Corresponding json file:
   "Config":
   {
     "ManyArrays": [ 10, 20 ],
-    "ManyArrays": [ 30, 40 ],
+    "ManyArrays": [ 30, 40 ]
   }
 }
 ```

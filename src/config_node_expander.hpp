@@ -114,6 +114,16 @@ class ConfigNodeExpander
                 return true;
             }
 
+            if (nodes.empty())
+            {
+                auto&& values = scope->getValues(from.c_str(), separator);
+                if (values.size() == 1 && values[0].empty())
+                {
+                    (*result)[parent].emplace_back(KeyNode{key, detail::ConfigNode::create(), index});
+                    return true;
+                }
+            }
+
             auto&& baseKeyNode = getBaseNode(scope, from);
             if (baseKeyNode.node)
             {

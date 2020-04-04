@@ -34,6 +34,7 @@ struct XmlExtension
                         <.>Elem2</.>
                         <.>Elem3</.>
                     </Array>
+                    <EmptyArray></EmptyArray>
                 </Ingredients>
                 <System>
                     <DataPath>%env.RUNTIME%/data</DataPath>
@@ -51,6 +52,9 @@ struct XmlExtension
                     <.>%node.ConfigShould.Ingredients%</.>
                     <.>%node.ConfigShould.Ingredients%</.>
                 </ArrayInjected>
+                <EmptyArrayInjected>
+                    %node.ConfigShould.Ingredients.EmptyArray%
+                </EmptyArrayInjected>
                 <Gateway>
                     <Parameters>
                         <Destination>XETRA</Destination>
@@ -87,6 +91,9 @@ struct JsonExtension
                         "Elem1",
                         "Elem2",
                         "Elem3"
+                    ],
+                    "EmptyArray" :
+                    [
                     ]
                 },
                 "System" :
@@ -105,6 +112,7 @@ struct JsonExtension
                     "%node.ConfigShould.Ingredients%",
                     "%node.ConfigShould.Ingredients%"
                 ],
+                "EmptyArrayInjected" : "%node.ConfigShould.Ingredients.EmptyArray%",
                 "Gateway"  :
                 {
                     "Parameters" :
@@ -237,6 +245,12 @@ TYPED_TEST(NodeExpanderShould, supportMixingNormalAndNodeElementsInArray)
     actual = scopes[1].template get<std::string>("LinkId");
     ASSERT_TRUE(static_cast<bool>(actual));
     EXPECT_EQ(std::string("155"), *actual);
+}
+
+TYPED_TEST(NodeExpanderShould, injectEmptyArrays)
+{
+    auto&& arr = this->config->getRef("ConfigShould.EmptyArrayInjected.");
+    EXPECT_EQ(0, arr.size());
 }
 
 } // namespace

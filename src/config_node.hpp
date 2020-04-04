@@ -79,6 +79,11 @@ public:
     using value_list = std::vector<value_type>;
     using node_list  = std::vector<node_type>;
 
+    static node_type create()
+    {
+        return std::make_shared<ConfigNode>();
+    }
+
     template<typename S>
     friend S& operator<<(S&& stream, const ConfigNode& node)
     {

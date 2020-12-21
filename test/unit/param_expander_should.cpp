@@ -17,8 +17,7 @@
 using testing::Test;
 using testing::_;
 
-namespace test {
-namespace dconfig {
+namespace test::dconfig {
 namespace {
 
 struct XmlExtension
@@ -175,6 +174,4 @@ TYPED_TEST(ParamExpanderShould, expandChainOfReferences)
 }
 
 } // namespace
-} // namespace dconfig
-} // namespace test
-
+} // namespace test::dconfig

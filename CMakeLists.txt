@@ -54,9 +54,9 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib/")
 #########################
 add_definitions(-Werror -Wall -Wextra -pedantic)
 if (CMAKE_BUILD_TYPE MATCHES Release)
-    add_definitions(-std=c++11 -O2)
+    add_definitions(-std=c++17 -O2)
 elseif (CMAKE_BUILD_TYPE MATCHES Debug)
-    add_definitions(-std=c++11 -g -O0 -fno-inline)
+    add_definitions(-std=c++17 -g -O0 -fno-inline)
 endif()
 add_definitions(-DHOOLA_CACHE_LINE_SIZE=${HOOLA_CACHE_LINE_SIZE})
 

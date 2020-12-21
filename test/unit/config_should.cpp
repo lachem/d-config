@@ -18,8 +18,7 @@
 using testing::Test;
 using testing::_;
 
-namespace test {
-namespace dconfig {
+namespace test::dconfig {
 
 struct XmlExtension
 {
@@ -412,6 +411,4 @@ TYPED_TEST(ConfigShould, provideMultipleScopeViaAlternativePaths)
     }
 }
 
-} // namespace dconfig
-} // namespace test
-
+} // namespace test::dconfig

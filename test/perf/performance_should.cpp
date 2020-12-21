@@ -15,8 +15,7 @@
 #include <iostream>
 #include <chrono>
 
-namespace test {
-namespace dconfig {
+namespace test::dconfig {
 
 struct Performance : ::testing::Test
 {
@@ -120,6 +119,4 @@ TEST_P(PerformanceParameterized, withMergingAndReplacing)
 
 INSTANTIATE_TEST_CASE_P(ForType, PerformanceParameterized, ::testing::Values("xml", "json"));
 
-} // namespace dconfig
-} // namespace test
-
+} // namespace test::dconfig

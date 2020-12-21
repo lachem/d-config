@@ -42,7 +42,8 @@ endif()
 message(STATUS "Using gmock root: ${GMOCK_ROOT}")
 
 set(GMOCK_INCLUDE_DIRS "${GMOCK_ROOT}/include")
-set(GMOCK_LIBRARY "${GMOCK_ROOT}/lib/libgmock.a")
+set(GMOCK_LIBRARY "${GMOCK_ROOT}/lib/x86_64-linux-gnu/libgmock.a")
+set(GMOCK_LIBRARY "${GMOCK_ROOT}/lib/x86_64-linux-gnu/libgtest.a")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin/")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib/")

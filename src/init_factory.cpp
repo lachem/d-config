@@ -50,7 +50,7 @@ std::vector<std::string> InitFactory::readFiles() const
         std::cerr << desc << std::endl;
     }
 
-    return std::move(cfgFiles);
+    return cfgFiles;
 }
 
 } //namespace dconfig

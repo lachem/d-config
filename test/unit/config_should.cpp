@@ -309,6 +309,19 @@ TYPED_TEST(ConfigShould, supportTemplates)
     EXPECT_EQ(std::string("500")       , scope.template get<std::string>("SessionInstance"));
 }
 
+TYPED_TEST(ConfigShould, supportTemplatesViaRelativePath)
+{
+    this->loadConfig();
+
+    auto scope = this->config->scope("ConfigShould.TemplatedRelative");
+
+    EXPECT_EQ(std::string("filename")  , scope.template get<std::string>("SessionFile"));
+    EXPECT_EQ(std::string("/root/data"), scope.template get<std::string>("DataPath"));
+    EXPECT_EQ(std::string("STH-20-2")  , scope.template get<std::string>("SessionUniqueId2"));
+    EXPECT_EQ(std::string("Unknown")   , scope.template get<std::string>("SessionStatus"));
+    EXPECT_EQ(std::string("500")       , scope.template get<std::string>("SessionInstance"));
+}
+
 TYPED_TEST(ConfigShould, supportBooleanValues)
 {
     this->loadConfig();

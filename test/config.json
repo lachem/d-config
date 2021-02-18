@@ -34,6 +34,14 @@
                 "SessionInstance" : 500
             }
         },
+        "TemplatedRelative":
+        {
+            "%template..System%" :
+            {
+                "SessionStatus"   : "Unknown",
+                "SessionInstance" : 500
+            }
+        },
         "BooleanTrue" : true,
         "BooleanFalse" : false,
         "IntTrue" : 1,

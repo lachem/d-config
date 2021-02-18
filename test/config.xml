@@ -30,6 +30,12 @@
             <SessionInstance>500</SessionInstance>
         </%template.ConfigShould.System%>
     </Templated>
+    <TemplatedRelative>
+        <%template..System%>
+            <SessionStatus>Unknown</SessionStatus>
+            <SessionInstance>500</SessionInstance>
+        </%template..System%>
+    </TemplatedRelative>
     <BooleanTrue>true</BooleanTrue>
     <BooleanFalse>false</BooleanFalse>
     <IntTrue>1</IntTrue>

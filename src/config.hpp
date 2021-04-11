@@ -22,9 +22,11 @@ namespace dconfig {
 
 class Config
 {
+    inline static std::vector<std::string> empty = {};
+
 public:
     template<typename T, typename P1, typename P2, typename... P>
-    boost::optional<T> get(P1&& p1, P2&& p2, P&&... p) const
+    [[nodiscard]] boost::optional<T> get(P1&& p1, P2&& p2, P&&... p) const
     {
         if (auto&& result = this->get<T>(p1))
             return result;
@@ -32,13 +34,13 @@ public:
     }
 
     template<typename T>
-    boost::optional<T> get(const std::string& path) const
+    [[nodiscard]] boost::optional<T> get(const std::string& path) const
     {
         return this->get<T>(path.c_str());
     }
 
     template<typename T>
-    boost::optional<T> get(const char* path) const
+    [[nodiscard]] boost::optional<T> get(const char* path) const
     {
         if(node)
         {
@@ -59,7 +61,7 @@ public:
     }
 
     template<typename T, typename P1, typename P2, typename... P>
-    std::vector<T> getAll(P1&& p1, P2&& p2, P&&... p) const
+    [[nodiscard]] std::vector<T> getAll(P1&& p1, P2&& p2, P&&... p) const
     {
         auto&& result = this->getAll<T>(p1);
         if (!result.empty())
@@ -68,13 +70,13 @@ public:
     }
 
     template<typename T>
-    std::vector<T> getAll(const std::string& path) const
+    [[nodiscard]] std::vector<T> getAll(const std::string& path) const
     {
         return this->getAll<T>(path.c_str());
     }
 
     template<typename T>
-    std::vector<T> getAll(const char* path) const
+    [[nodiscard]] std::vector<T> getAll(const char* path) const
     {
         std::vector<T> result;
         if(node)
@@ -95,50 +97,49 @@ public:
             }
         }
 
-        return result;
+        return {};
     }
 
     template<typename P1, typename P2, typename... P>
-    const std::vector<std::string>& getRef(P1&& p1, P2&& p2, P&&... p) const
+    [[nodiscard]] const std::vector<std::string>& getRef(P1&& p1, P2&& p2, P&&... p) const
     {
-        const auto& result = this->getRef(p1);
-        if (!result.empty())
+        if (const auto& result = this->getRef(p1);
+            !result.empty())
             return result;
         return this->getRef(std::forward<P2>(p2), std::forward<P>(p)...);
     }
 
-    const std::vector<std::string>& getRef(const std::string& path) const
+    [[nodiscard]] const std::vector<std::string>& getRef(const std::string& path) const
     {
         return this->getRef(path.c_str());
     }
 
-    const std::vector<std::string>& getRef(const char* path) const
+    [[nodiscard]] const std::vector<std::string>& getRef(const char* path) const
     {
-        static const std::vector<std::string> empty;
         return (node)
             ? node->getValues(path, separator)
             : empty;
     }
 
     template<typename P1, typename P2, typename... P>
-    Config scope(P1&& p1, P2&& p2, P&&... p) const
+    [[nodiscard]] Config scope(P1&& p1, P2&& p2, P&&... p) const
     {
         if (auto&& result = this->scope(p1))
             return result;
         return this->scope(std::forward<P2>(p2), std::forward<P>(p)...);
     }
 
-    Config scope(const std::string& path) const
+    [[nodiscard]] Config scope(const std::string& path) const
     {
         return this->scope(path.c_str());
     }
 
-    Config scope(const char* path) const
+    [[nodiscard]] Config scope(const char* path) const
     {
         if (node)
         {
-            const auto& nodes = node->getNodes(path, separator);
-            if (!nodes.empty())
+            if (const auto& nodes = node->getNodes(path, separator);
+                !nodes.empty())
             {
                 return Config(nodes[0], separator);
             }
@@ -147,7 +148,7 @@ public:
     }
 
     template<typename P1, typename P2, typename... P>
-    std::vector<Config> scopes(P1&& p1, P2&& p2, P&&... p) const
+    [[nodiscard]] std::vector<Config> scopes(P1&& p1, P2&& p2, P&&... p) const
     {
         auto&& result = this->scopes(p1);
         if (!result.empty())
@@ -155,12 +156,12 @@ public:
         return this->scopes(std::forward<P2>(p2), std::forward<P>(p)...);
     }
 
-    std::vector<Config> scopes(const std::string& path) const
+    [[nodiscard]] std::vector<Config> scopes(const std::string& path) const
     {
         return this->scopes(path.c_str());
     }
 
-    std::vector<Config> scopes(const char* path) const
+    [[nodiscard]] std::vector<Config> scopes(const char* path) const
     {
         std::vector<Config> result;
         if(node)
@@ -175,13 +176,13 @@ public:
     }
 
     template<typename S>
-    friend S& operator<<(S& stream, const Config& cfg)
+    [[nodiscard]] friend S& operator<<(S& stream, const Config& cfg)
     {
         stream << *cfg.node;
         return stream;
     }
 
-    explicit operator bool() const noexcept
+    [[nodiscard]] explicit operator bool() const noexcept
     {
         return static_cast<bool>(node);
     }
@@ -211,8 +212,8 @@ inline boost::optional<std::string> Config::get<std::string>(const char* path) c
 {
     if(node)
     {
-        const auto& values = node->getValues(path, separator);
-        if (!values.empty())
+        if (const auto& values = node->getValues(path, separator);
+            !values.empty())
         {
             return boost::optional<std::string>(values[0]);
         }
@@ -229,6 +230,7 @@ inline boost::optional<bool> Config::get<bool>(const char* path) const
         {
             return true;
         }
+
         if (*value == "false")
         {
             return false;
@@ -243,7 +245,6 @@ inline boost::optional<bool> Config::get<bool>(const char* path) const
 template<>
 inline std::vector<std::string> Config::getAll<std::string>(const char* path) const
 {
-    static std::vector<std::string> empty;
     return (node)
         ? node->getValues(path, separator)
         : empty;

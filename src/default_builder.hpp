@@ -18,7 +18,7 @@ namespace dconfig {
 
 struct DefaultBuilder
 {
-    explicit DefaultBuilder(Separator separator = Separator(), ArrayKey arrayKey = ArrayKey())
+    explicit DefaultBuilder(Separator separator = {}, ArrayKey arrayKey = {})
         : separator(separator)
         , arrayKey(arrayKey)
     {
@@ -28,8 +28,8 @@ struct DefaultBuilder
     DefaultBuilder(const DefaultBuilder&) = delete;
     DefaultBuilder& operator=(const DefaultBuilder&) = delete;
 
-    Config build(const std::vector<std::string>& contents) const;
-    Config build(std::vector<std::string>&& contents) const;
+    [[nodiscard]] Config build(const std::vector<std::string>& contents) const;
+    [[nodiscard]] Config build(std::vector<std::string>&& contents) const;
 
 private:
     Separator separator;

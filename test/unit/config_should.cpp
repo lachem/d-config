@@ -342,14 +342,14 @@ TYPED_TEST(ConfigShould, rethrowBadCastAsInvalidArgument)
 {
     this->loadConfig();
 
-    EXPECT_THROW(this->config->template get<int>("ConfigShould.System.SessionFile"), std::invalid_argument);
+    EXPECT_THROW((void)this->config->template get<int>("ConfigShould.System.SessionFile"), std::invalid_argument);
 }
 
 TYPED_TEST(ConfigShould, rethrowBadCastAsInvalidArgument2)
 {
     this->loadConfig();
 
-    EXPECT_THROW(this->config->template getAll<int>("ConfigShould.System.SessionFile"), std::invalid_argument);
+    EXPECT_THROW((void)this->config->template getAll<int>("ConfigShould.System.SessionFile"), std::invalid_argument);
 }
 
 TYPED_TEST(ConfigShould, provideValuesViaAlternativePaths)

@@ -12,7 +12,6 @@
 //boost
 #include <boost/lexical_cast.hpp>
 #include <boost/optional.hpp>
-#include <boost/type_index.hpp>
 
 //std
 #include <vector>
@@ -29,7 +28,9 @@ public:
     [[nodiscard]] boost::optional<T> get(P1&& p1, P2&& p2, P&&... p) const
     {
         if (auto&& result = this->get<T>(p1))
+        {
             return result;
+        }
         return this->get<T>(std::forward<P2>(p2), std::forward<P>(p)...);
     }
 
@@ -44,8 +45,7 @@ public:
     {
         if(node)
         {
-            auto value = get<std::string>(path);
-            if (value)
+            if (auto&& value = get<std::string>(path))
             {
                 try
                 {
@@ -63,9 +63,11 @@ public:
     template<typename T, typename P1, typename P2, typename... P>
     [[nodiscard]] std::vector<T> getAll(P1&& p1, P2&& p2, P&&... p) const
     {
-        auto&& result = this->getAll<T>(p1);
-        if (!result.empty())
+        if (auto&& result = this->getAll<T>(p1);
+            !result.empty())
+        {
             return result;
+        }
         return this->getAll<T>(std::forward<P2>(p2), std::forward<P>(p)...);
     }
 
@@ -105,7 +107,9 @@ public:
     {
         if (const auto& result = this->getRef(p1);
             !result.empty())
+        {
             return result;
+        }
         return this->getRef(std::forward<P2>(p2), std::forward<P>(p)...);
     }
 
@@ -150,9 +154,11 @@ public:
     template<typename P1, typename P2, typename... P>
     [[nodiscard]] std::vector<Config> scopes(P1&& p1, P2&& p2, P&&... p) const
     {
-        auto&& result = this->scopes(p1);
-        if (!result.empty())
+        if (auto&& result = this->scopes(p1);
+            !result.empty())
+        {
             return result;
+        }
         return this->scopes(std::forward<P2>(p2), std::forward<P>(p)...);
     }
 

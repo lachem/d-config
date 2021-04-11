@@ -9,9 +9,6 @@ namespace dconfig {
 
 struct ArrayKey
 {
-    ArrayKey() = default;
-    explicit ArrayKey(char aValue) : value(aValue) {}
-
     operator char () const { return value; }
     char value = '.';
 };

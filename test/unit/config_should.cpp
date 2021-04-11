@@ -35,7 +35,7 @@ struct InitConfigLoader
 {
     using extension = Extension;
 
-    void loadConfig(const ::dconfig::Separator& separator = ::dconfig::Separator())
+    void loadConfig(const ::dconfig::Separator& separator = {})
     {
         auto configFile         = std::string("test/config.") + Extension::name;
         auto configFileOverride = std::string("test/config_override.") + Extension::name;
@@ -60,7 +60,7 @@ struct TextConfigLoader
 {
     using extension = Extension;
 
-    void loadConfig(const ::dconfig::Separator& separator = ::dconfig::Separator())
+    void loadConfig(const ::dconfig::Separator& separator = {})
     {
         std::vector<std::string> files;
         files.push_back(loadFile(std::string("test/config.") + Extension::name));
@@ -86,7 +86,7 @@ struct FileConfigLoader
 {
     using extension = Extension;
 
-    void loadConfig(const ::dconfig::Separator& separator = ::dconfig::Separator())
+    void loadConfig(const ::dconfig::Separator& separator = {})
     {
         std::vector<std::string> files;
         files.push_back(std::string("test/config.") + Extension::name);
@@ -150,7 +150,7 @@ TYPED_TEST(ConfigShould, expandEnvironmentVariables2)
 TYPED_TEST(ConfigShould, allowSlashSeperator)
 {
     setenv("SOURCE","/source",1);
-    this->loadConfig(::dconfig::Separator('/'));
+    this->loadConfig(::dconfig::Separator{'/'});
     EXPECT_EQ(std::string("/source/data"), this->config->template get<std::string>("ConfigShould/System/FixConfig"));
 }
 
@@ -418,7 +418,7 @@ TYPED_TEST(ConfigShould, provideMultipleScopeViaAlternativePaths)
 
     ASSERT_EQ(2, configScopes.size());
 
-    for (auto&& scope : configScopes)
+    for (const auto& scope : configScopes)
     {
         EXPECT_TRUE(scope.template get<std::string>("Rep").get().find("Value") != std::string::npos);
     }

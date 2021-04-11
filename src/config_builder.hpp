@@ -27,13 +27,25 @@ struct ConfigBuilder
     template<typename... T>
     explicit ConfigBuilder(T&&... aParams)
     {
-        segregate(std::forward<T>(aParams)...);
+        (segregate(std::forward<T>(aParams)), ...);
     }
 
     ConfigBuilder() = delete;
     ConfigBuilder(ConfigBuilder&&) = delete;
     ConfigBuilder(const ConfigBuilder&) = delete;
     ConfigBuilder& operator=(const ConfigBuilder&) = delete;
+
+    ConfigBuilder& addPreExpander(const prebuild_expander_type& expander)
+    {
+        preexpand.push_back(expander);
+        return *this;
+    }
+
+    ConfigBuilder& addPostExpander(const postbuild_expander_type& expander)
+    {
+        postexpand.push_back(expander);
+        return *this;
+    }
 
     Config build(std::vector<std::string>&& contents)
     {
@@ -42,24 +54,6 @@ struct ConfigBuilder
 
 private:
     node_type parse(std::vector<std::string>&& contents);
-
-    template<typename T1, typename T2, typename... T>
-    void segregate(T1&& p1, T2&& p2, T&&... params)
-    {
-        segregate(std::forward<T1>(p1));
-        segregate(std::forward<T2>(p2));
-        segregate(std::forward<T >(params)...);
-    }
-
-    void segregate(const prebuild_expander_type& pre)
-    {
-        preexpand.push_back(pre);
-    }
-
-    void segregate(const postbuild_expander_type& post)
-    {
-        postexpand.push_back(post);
-    }
 
     void segregate(Separator separator)
     {

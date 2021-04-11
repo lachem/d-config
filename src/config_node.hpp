@@ -171,7 +171,7 @@ public:
             }
         }
 
-        return noValues();
+        return dummy<value_list>;
     }
 
     const value_list& getValues(const std::string& key, Separator separator) const
@@ -185,7 +185,7 @@ public:
         auto&& nodes = getNodes(key1);
         return (!nodes.empty())
             ? nodes[0]->getValues(key2, keys...)
-            : noValues();
+            : dummy<value_list>;
     }
 
     const value_list& getValues(const boost::string_ref& key) const
@@ -196,7 +196,7 @@ public:
             return child->value;
         }
 
-        return noValues();
+        return dummy<value_list>;
     }
 
     const node_list& getNodes(const char* key, Separator separator) const
@@ -218,7 +218,7 @@ public:
             }
         }
 
-        return noNodes();
+        return dummy<node_list>;
     }
 
     const node_list& getNodes(const std::string& key, Separator separator) const
@@ -232,7 +232,7 @@ public:
         auto&& nodes = getNodes(key1);
         return (!nodes.empty())
             ? nodes[0]->getNodes(key2, keys...)
-            : noNodes();
+            : dummy<node_list>;
     }
 
     const node_list& getNodes(const boost::string_ref& key) const
@@ -243,7 +243,7 @@ public:
             return child->value;
         }
 
-        return noNodes();
+        return dummy<node_list>;
     }
 
     const node_type& getParent() const
@@ -362,16 +362,6 @@ private:
     static void clearJustSeparatorKey(const char*& key, Separator separator)
     {
         key = (key[0] != '\0' && key[1] == '\0' && key[0] == separator) ? "" : key;
-    }
-
-    static const value_list& noValues()
-    {
-        return dummy<value_list>;
-    }
-
-    static const node_list& noNodes()
-    {
-        return dummy<node_list>;
     }
 
     children_container<node_list> nodes;

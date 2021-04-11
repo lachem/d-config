@@ -37,10 +37,10 @@ ConfigBuilder::node_type buildCustomTree(const boost::property_tree::ptree& sour
     queue.push(std::make_pair(&source, result));
     while (!queue.empty())
     {
-        for(auto&& node : *queue.front().first)
+        for (auto&& node : *queue.front().first)
         {
-            auto&& key = node.first;
-            if (!node.second.empty())
+            if (auto&& key = node.first;
+                !node.second.empty())
             {
                 auto&& insert = std::make_shared<detail::ConfigNode>();
                 if (!key.empty() && key[0] != arrayKey.value)
@@ -114,7 +114,7 @@ boost::property_tree::ptree buildPropertyTree(const std::string& contents)
 ConfigBuilder::node_type ConfigBuilder::parse(std::vector<std::string>&& contents)
 {
     ConfigBuilder::node_type root;
-    for(auto& expanded : contents)
+    for (auto& expanded : contents)
     {
         for (auto& expander : preexpand)
         {
@@ -122,9 +122,8 @@ ConfigBuilder::node_type ConfigBuilder::parse(std::vector<std::string>&& content
         }
         boost::trim(expanded);
 
-        auto mergeFrom = buildCustomTree(buildPropertyTree(expanded), arrayKey);
-
-        if (!root)
+        if (auto mergeFrom = buildCustomTree(buildPropertyTree(expanded), arrayKey);
+            !root)
         {
             root = mergeFrom;
         }
@@ -134,7 +133,7 @@ ConfigBuilder::node_type ConfigBuilder::parse(std::vector<std::string>&& content
         }
     }
 
-    if(root && !root->empty())
+    if (root && !root->empty())
     {
         for (auto& expander : postexpand)
         {

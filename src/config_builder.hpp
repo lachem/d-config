@@ -24,10 +24,10 @@ struct ConfigBuilder
     using prebuild_expander_type = std::function<void (std::string&)>;
     using postbuild_expander_type = std::function<void (detail::ConfigNode&)>;
 
-    template<typename... T>
-    explicit ConfigBuilder(T&&... aParams)
+    explicit ConfigBuilder(Separator separator = {}, ArrayKey arrayKey = {})
+        : separator(separator)
+        , arrayKey(arrayKey)
     {
-        (segregate(std::forward<T>(aParams)), ...);
     }
 
     ConfigBuilder() = delete;
@@ -54,21 +54,6 @@ struct ConfigBuilder
 
 private:
     node_type parse(std::vector<std::string>&& contents);
-
-    void segregate(Separator separator)
-    {
-        this->separator = separator;
-    }
-
-    void segregate(ArrayKey arrayKey)
-    {
-        this->arrayKey = arrayKey;
-    }
-
-    void segregate()
-    {
-        //empty
-    }
 
     std::vector<prebuild_expander_type> preexpand;
     std::vector<postbuild_expander_type> postexpand;

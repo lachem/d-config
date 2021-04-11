@@ -21,7 +21,7 @@ namespace dconfig {
 
 class Config
 {
-    inline static std::vector<std::string> empty = {};
+    inline static std::vector<std::string> dummy = {};
 
 public:
     template<typename T, typename P1, typename P2, typename... P>
@@ -122,7 +122,7 @@ public:
     {
         return (node)
             ? node->getValues(path, separator)
-            : empty;
+            : dummy;
     }
 
     template<typename P1, typename P2, typename... P>
@@ -253,7 +253,7 @@ inline std::vector<std::string> Config::getAll<std::string>(const char* path) co
 {
     return (node)
         ? node->getValues(path, separator)
-        : empty;
+        : dummy;
 }
 
 } //namespace dconfig

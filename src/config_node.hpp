@@ -72,6 +72,9 @@ class ConfigNode : public std::enable_shared_from_this<ConfigNode>
             , boost::multi_index::sequenced
                 < boost::multi_index::tag<sequenced>> >>;
 
+    template<typename T>
+    inline static const T dummy = {};
+
 public:
     using value_type = std::string;
     using node_type  = std::shared_ptr<ConfigNode>;
@@ -99,8 +102,8 @@ public:
     template<typename T>
     void setValue(const std::string& key, T&& value, size_t index = std::numeric_limits<size_t>::max())
     {
-        auto&& it = values.get<ordered>().find(key);
-        if (it == values.get<ordered>().end())
+        if (auto&& it = values.get<ordered>().find(key);
+            it == values.get<ordered>().end())
         {
             values.get<sequenced>().push_back({key, value_list{std::forward<T>(value)}});
         }
@@ -126,8 +129,8 @@ public:
     void setNode(const std::string& key, T&& node, size_t index = std::numeric_limits<size_t>::max())
     {
         node->parent = shared_from_this();
-        auto&& it = nodes.get<ordered>().find(key);
-        if (it == nodes.get<ordered>().end())
+        if (auto&& it = nodes.get<ordered>().find(key);
+            it == nodes.get<ordered>().end())
         {
             nodes.get<sequenced>().push_back({key, node_list{std::forward<T>(node)}});
         }
@@ -156,8 +159,8 @@ public:
             clearJustSeparatorKey(key, separator);
             if (auto&& first = std::strchr(key, separator))
             {
-                auto&& nodes = this->getNodes(boost::string_ref(key, first - key));
-                if (!nodes.empty())
+                if (auto&& nodes = this->getNodes(boost::string_ref(key, first - key));
+                    !nodes.empty())
                 {
                     return nodes[0]->getValues(first + 1, separator);
                 }
@@ -187,8 +190,8 @@ public:
 
     const value_list& getValues(const boost::string_ref& key) const
     {
-        auto&& child = values.get<referenced>().find(key);
-        if (child != values.get<referenced>().end())
+        if (auto&& child = values.get<referenced>().find(key);
+            child != values.get<referenced>().end())
         {
             return child->value;
         }
@@ -203,8 +206,8 @@ public:
             clearJustSeparatorKey(key, separator);
             if (auto&& first = std::strchr(key, separator))
             {
-                auto&& nodes = this->getNodes(boost::string_ref(key, first - key));
-                if (!nodes.empty())
+                if (auto&& nodes = this->getNodes(boost::string_ref(key, first - key));
+                    !nodes.empty())
                 {
                     return nodes[0]->getNodes(first + 1, separator);
                 }
@@ -234,8 +237,8 @@ public:
 
     const node_list& getNodes(const boost::string_ref& key) const
     {
-        auto&& child = nodes.get<referenced>().find(key);
-        if (child != nodes.get<referenced>().end())
+        if (auto&& child = nodes.get<referenced>().find(key);
+            child != nodes.get<referenced>().end())
         {
             return child->value;
         }
@@ -256,8 +259,8 @@ public:
 
     void eraseValue(const std::string& key, size_t index)
     {
-        auto&& it = values.get<ordered>().find(key);
-        if (it != values.get<ordered>().end())
+        if (auto&& it = values.get<ordered>().find(key);
+            it != values.get<ordered>().end())
         {
             values.get<ordered>().modify(it,
                 [index](ElementType<value_list>& element)
@@ -270,8 +273,8 @@ public:
 
     void eraseNode(const std::string& key, size_t index)
     {
-        auto&& it = nodes.get<ordered>().find(key);
-        if (it != nodes.get<ordered>().end())
+        if (auto&& it = nodes.get<ordered>().find(key);
+            it != nodes.get<ordered>().end())
         {
             nodes.get<ordered>().modify(it,
                 [index](ElementType<node_list>& element)
@@ -363,14 +366,12 @@ private:
 
     static const value_list& noValues()
     {
-        static const value_list empty;
-        return empty;
+        return dummy<value_list>;
     }
 
     static const node_list& noNodes()
     {
-        static const node_list empty;
-        return empty;
+        return dummy<node_list>;
     }
 
     children_container<node_list> nodes;

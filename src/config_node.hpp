@@ -23,7 +23,7 @@
 
 //std
 #include <memory>
-#include <utility>
+//#include <utility>
 #include <vector>
 #include <string>
 #include <functional>
@@ -82,7 +82,7 @@ public:
     using value_list = std::vector<value_type>;
     using node_list  = std::vector<node_type>;
 
-    static node_type create()
+    [[nodiscard]] static node_type create()
     {
         return std::make_shared<ConfigNode>();
     }
@@ -94,7 +94,7 @@ public:
         return stream;
     }
 
-    bool empty() const
+    [[nodiscard]] bool empty() const
     {
         return values.empty() && nodes.empty();
     }
@@ -152,7 +152,7 @@ public:
         }
     }
 
-    const value_list& getValues(const char* key, Separator separator) const
+    [[nodiscard]] const value_list& getValues(const char* key, Separator separator) const
     {
         if (key)
         {
@@ -174,13 +174,13 @@ public:
         return dummy<value_list>;
     }
 
-    const value_list& getValues(const std::string& key, Separator separator) const
+    [[nodiscard]] const value_list& getValues(const std::string& key, Separator separator) const
     {
         return this->getValues(key.c_str(), separator);
     }
 
     template<typename... K>
-    const value_list& getValues(const boost::string_ref& key1, const boost::string_ref& key2, K&&... keys) const
+    [[nodiscard]] const value_list& getValues(const boost::string_ref& key1, const boost::string_ref& key2, K&&... keys) const
     {
         auto&& nodes = getNodes(key1);
         return (!nodes.empty())
@@ -188,7 +188,7 @@ public:
             : dummy<value_list>;
     }
 
-    const value_list& getValues(const boost::string_ref& key) const
+    [[nodiscard]] const value_list& getValues(const boost::string_ref& key) const
     {
         if (auto&& child = values.get<referenced>().find(key);
             child != values.get<referenced>().end())
@@ -199,7 +199,7 @@ public:
         return dummy<value_list>;
     }
 
-    const node_list& getNodes(const char* key, Separator separator) const
+    [[nodiscard]] const node_list& getNodes(const char* key, Separator separator) const
     {
         if (key)
         {
@@ -221,13 +221,13 @@ public:
         return dummy<node_list>;
     }
 
-    const node_list& getNodes(const std::string& key, Separator separator) const
+    [[nodiscard]] const node_list& getNodes(const std::string& key, Separator separator) const
     {
         return getNodes(key.c_str(), separator);
     }
 
     template<typename... K>
-    const node_list& getNodes(const boost::string_ref& key1, const boost::string_ref& key2, K&&... keys) const
+    [[nodiscard]] const node_list& getNodes(const boost::string_ref& key1, const boost::string_ref& key2, K&&... keys) const
     {
         auto&& nodes = getNodes(key1);
         return (!nodes.empty())
@@ -235,7 +235,7 @@ public:
             : dummy<node_list>;
     }
 
-    const node_list& getNodes(const boost::string_ref& key) const
+    [[nodiscard]] const node_list& getNodes(const boost::string_ref& key) const
     {
         if (auto&& child = nodes.get<referenced>().find(key);
             child != nodes.get<referenced>().end())
@@ -246,7 +246,7 @@ public:
         return dummy<node_list>;
     }
 
-    const node_type& getParent() const
+    [[nodiscard]] const node_type& getParent() const
     {
         return parent;
     }
@@ -294,7 +294,7 @@ public:
         updateParents(Recurse::no);
     }
 
-    ConfigNode::node_type clone() const;
+    [[nodiscard]] ConfigNode::node_type clone() const;
 
     template<typename V>
     void accept(V&& visitor)

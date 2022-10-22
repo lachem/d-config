@@ -28,7 +28,7 @@ class Config
     template<typename V>
     struct Visitor
     {
-        explicit Visitor(V&& visitor, Separator separator)
+        Visitor(V&& visitor, Separator separator)
             : separator(separator)
             , visitor{std::forward<V>(visitor)}
         {}

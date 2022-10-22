@@ -8,6 +8,7 @@
 //local
 #include <config_node.hpp>
 #include <separator.hpp>
+#include <array_key.hpp>
 
 //boost
 #include <boost/lexical_cast.hpp>
@@ -22,6 +23,30 @@ namespace dconfig {
 class Config
 {
     inline static std::vector<std::string> dummy = {};
+    inline static std::string arrayKey = {ArrayKey{}.value};
+
+    template<typename V>
+    struct Visitor
+    {
+        explicit Visitor(V&& visitor, Separator separator)
+            : separator(separator)
+            , visitor{std::forward<V>(visitor)}
+        {}
+
+        void visit(detail::ConfigNode::node_type const&, const std::string& key, size_t, std::string& value)
+        {
+            visitor(key.empty() ? arrayKey : key, value);
+        }
+
+        void visit(detail::ConfigNode::node_type const&, const std::string& key, size_t, detail::ConfigNode::node_type const& node)
+        {
+            visitor(key, Config{node, separator});
+        }
+
+    private:
+        Separator separator;
+        V visitor;
+    };
 
 public:
     template<typename T, typename P1, typename P2, typename... P>
@@ -179,6 +204,12 @@ public:
             }
         }
         return result;
+    }
+
+    template<typename V>
+    void accept(V&& visitor)
+    {
+        node->accept(Visitor{std::forward<V>(visitor), separator});
     }
 
     template<typename S>

@@ -47,21 +47,21 @@ class ConfigTemplateExpander
             assert(result);
         }
 
-        void visit(detail::ConfigNode& parent, const std::string& key, size_t, std::string&)
+        void visit(detail::ConfigNode::node_type const& parent, const std::string& key, size_t, std::string&)
         {
             visit(parent, key);
         }
 
-        void visit(detail::ConfigNode& parent, const std::string& key, size_t, detail::ConfigNode& node)
+        void visit(detail::ConfigNode::node_type const& parent, const std::string& key, size_t, detail::ConfigNode::node_type const& node)
         {
             if (!visit(parent, key)) // TODO: Add support for nested templates?
             {
-                node.accept(*this);
+                node->accept(*this);
             }
         }
 
     private:
-        bool visit(detail::ConfigNode& parent, const std::string& key)
+        bool visit(detail::ConfigNode::node_type const& parent, const std::string& key)
         {
             using namespace boost::xpressive;
 
@@ -71,17 +71,16 @@ class ConfigTemplateExpander
                 if (what.size() > 3)
                 {
                     auto&& path = what[3].str();
-                    auto scope = resolveScope(what, &parent);
-                    if (scope && addKeyNode(scope, &parent, key, path))
+                    auto scope = resolveScope(what, parent.get());
+                    if (scope && addKeyNode(scope, parent.get(), key, path))
                         return true;
 
                     //for backward compatiblity fallback to node scope
-                    if (scope == root && addKeyNode(&parent, &parent, key, path))
+                    if (scope == root && addKeyNode(parent.get(), parent.get(), key, path))
                         return true;
                 }
 
-                throw std::invalid_argument(
-                    std::string("Could not resolve \"") + key + "\"");
+                throw std::invalid_argument{std::string{"Could not resolve \""} + key + "\""};
             }
 
             return false;

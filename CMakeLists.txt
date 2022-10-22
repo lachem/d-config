@@ -5,7 +5,7 @@ project (d-config)
 ###############################
 # Detect compiler and version #
 ###############################
-if(NOT CMAKE_COMPILER_IS_GNUCXX) 
+if(NOT CMAKE_COMPILER_IS_GNUCXX)
     message(FATAL_ERROR "Wrong compiler used, required g++ 4.8 or greater")
 endif()
 
@@ -65,7 +65,7 @@ add_definitions(-DHOOLA_CACHE_LINE_SIZE=${HOOLA_CACHE_LINE_SIZE})
 ######################
 
 add_custom_target(distclean
-    rm -rf bin lib CMakeCache.txt CMakeFiles cmake_install.cmake Makefile 
+    rm -rf bin lib CMakeCache.txt CMakeFiles cmake_install.cmake Makefile
 )
 
 ###############

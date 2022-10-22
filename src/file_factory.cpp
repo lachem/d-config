@@ -14,11 +14,10 @@ namespace dconfig {
 
 Config FileFactory::create() const
 {
-    std::vector<std::string> contents;
+    auto contents = std::vector<std::string>{};
     for(auto&& filename : files)
-    {        
-        std::ifstream in(filename, std::ios::in | std::ios::binary);
-        if (in)
+    {
+        if (auto in = std::ifstream{filename, std::ios::in | std::ios::binary})
         {
             std::string loaded;
             in.seekg(0, std::ios::end);

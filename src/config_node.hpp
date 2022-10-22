@@ -9,26 +9,25 @@
 #include <separator.hpp>
 
 //boost
-#include <boost/multi_index_container.hpp>
-#include <boost/multi_index/sequenced_index.hpp>
-#include <boost/multi_index/ordered_index.hpp>
-#include <boost/multi_index/hashed_index.hpp>
-#include <boost/multi_index/identity.hpp>
-#include <boost/multi_index/member.hpp>
-#include <boost/multi_index/mem_fun.hpp>
-#include <boost/utility/string_ref.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/functional/hash.hpp>
+#include <boost/multi_index_container.hpp>
+#include <boost/multi_index/hashed_index.hpp>
+#include <boost/multi_index/identity.hpp>
+#include <boost/multi_index/mem_fun.hpp>
+#include <boost/multi_index/member.hpp>
+#include <boost/multi_index/ordered_index.hpp>
+#include <boost/multi_index/sequenced_index.hpp>
+#include <boost/utility/string_ref.hpp>
 
 //std
-#include <memory>
-//#include <utility>
-#include <vector>
-#include <string>
-#include <functional>
 #include <cstring>
+#include <functional>
 #include <limits>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace dconfig {
 namespace detail {
@@ -304,7 +303,7 @@ public:
             size_t index = 0;
             for (auto&& node : child.value)
             {
-                visitor.visit(*this, child.key, index++, *node);
+                visitor.visit(shared_from_this(), child.key, index++, node);
             }
         }
         for(auto&& child : values.get<sequenced>())
@@ -313,7 +312,7 @@ public:
             for (auto&& value : child.value)
             {
                 //NOTE: const_cast is safe here as we are not touching the key
-                visitor.visit(*this, child.key, index++, const_cast<std::string&>(value));
+                visitor.visit(shared_from_this(), child.key, index++, const_cast<std::string&>(value));
             }
         }
     }
@@ -324,10 +323,9 @@ private:
     {
         for (const auto& child : nodes.get<sequenced>())
         {
-            stream  << std::endl
-                    << indent << child.key
-                    << " ("   << std::hex << this << ")"
-                    << " -> " << std::hex << parent.get();
+            stream  << "\n"    << indent << child.key
+                    << " ("    << std::hex << this << ")"
+                    << " -> "  << std::hex << parent.get();
             for (const auto& node : child.value)
             {
                 node->print(stream, indent + "    ");
@@ -335,13 +333,12 @@ private:
         }
         for (const auto& child : values.get<sequenced>())
         {
-            stream  << std::endl
-                    << indent << child.key << " = [";
+            stream  << "\n"    << indent << child.key << " = [";
             for (const auto& value : child.value)
             {
                 stream << value << ",";
             }
-            stream << "] -> " << std::hex << parent.get();
+            stream  << "] -> " << std::hex << parent.get();
         }
     }
 

@@ -111,11 +111,11 @@ class ConfigParamExpander
             assert(levelUp);
         }
 
-        void visit(detail::ConfigNode& parent, const std::string& key, size_t index, std::string& value)
+        void visit(detail::ConfigNode::node_type const& parent, const std::string& key, size_t index, std::string& value)
         {
             try
             {
-                value = boost::xpressive::regex_replace(value, *match, RegexExpander(root, &parent, separator, levelUp));
+                value = boost::xpressive::regex_replace(value, *match, RegexExpander(root, parent.get(), separator, levelUp));
             }
             catch (const std::invalid_argument&)
             {
@@ -126,9 +126,9 @@ class ConfigParamExpander
             }
         }
 
-        void visit(detail::ConfigNode&, const std::string&, size_t, detail::ConfigNode& node)
+        void visit(detail::ConfigNode::node_type const&, const std::string&, size_t, detail::ConfigNode::node_type const& node)
         {
-            node.accept(*this);
+            node->accept(*this);
         }
 
         const boost::xpressive::sregex* match;

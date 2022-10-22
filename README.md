@@ -237,7 +237,7 @@ std::vector<int32_t> values = config.getAll<int32_t>("Config.Array.");
 ```
 or
 ```cpp
-std::vector<int32_t> values = config.scope("Config.Array").getAll<int32_t>("");
+std::vector<int32_t> values = config.scope("Config.Array").getAll<int32_t>(".");
 ```
 Corresponding json file:
 ```json

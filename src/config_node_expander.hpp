@@ -52,7 +52,7 @@ class ConfigNodeExpander
             assert(result);
         }
 
-        void visit(detail::ConfigNode& parent, const std::string& key, size_t index, std::string& value)
+        void visit(detail::ConfigNode::node_type const& parent, const std::string& key, size_t index, std::string& value)
         {
             using namespace boost::xpressive;
 
@@ -62,12 +62,12 @@ class ConfigNodeExpander
                 if (what.size() > 3)
                 {
                     auto&& path = what[3].str();
-                    auto scope = resolveScope(what, &parent);
-                    if (scope && addKeyNode(scope, &parent, key, index, path))
+                    auto scope = resolveScope(what, parent.get());
+                    if (scope && addKeyNode(scope, parent.get(), key, index, path))
                         return;
 
                     //for backward compatiblity fallback to node scope
-                    if (scope == root && addKeyNode(&parent, &parent, key, index, path))
+                    if (scope == root && addKeyNode(parent.get(), parent.get(), key, index, path))
                         return;
                 }
 
@@ -78,9 +78,9 @@ class ConfigNodeExpander
             }
         }
 
-        void visit(detail::ConfigNode&, const std::string&, size_t, detail::ConfigNode& node)
+        void visit(detail::ConfigNode::node_type const&, const std::string&, size_t, detail::ConfigNode::node_type const& node)
         {
-            node.accept(*this);
+            node->accept(*this);
         }
 
     private:
@@ -124,8 +124,8 @@ class ConfigNodeExpander
                 }
             }
 
-            auto&& baseKeyNode = getBaseNode(scope, from);
-            if (baseKeyNode.node)
+            if (auto&& baseKeyNode = getBaseNode(scope, from);
+                baseKeyNode.node)
             {
                 auto findIt = result->find(baseKeyNode.node.get());
                 if (findIt != result->end())

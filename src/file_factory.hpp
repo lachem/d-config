@@ -20,8 +20,8 @@ namespace dconfig
 struct FileFactory
 {
     template<typename T>
-    explicit FileFactory(T&& aFileList, Separator separator = Separator(), ArrayKey arrayKey = ArrayKey())
-        : files(std::forward<T>(aFileList))
+    explicit FileFactory(T&& fileList, Separator separator = Separator(), ArrayKey arrayKey = ArrayKey())
+        : files(std::forward<T>(fileList))
         , separator(separator)
         , arrayKey(arrayKey)
     {

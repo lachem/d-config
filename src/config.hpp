@@ -124,7 +124,7 @@ public:
             }
         }
 
-        return {};
+        return result;
     }
 
     template<typename P1, typename P2, typename... P>

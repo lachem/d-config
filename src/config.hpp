@@ -35,7 +35,7 @@ class Config
 
         void visit(detail::ConfigNode::node_type const&, const std::string& key, size_t, std::string& value)
         {
-            visitor(key.empty() ? arrayKey : key, value);
+            visitor(key.empty() ? arrayKey : key, static_cast<std::string const&>(value));
         }
 
         void visit(detail::ConfigNode::node_type const&, const std::string& key, size_t, detail::ConfigNode::node_type const& node)

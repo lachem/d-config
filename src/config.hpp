@@ -207,7 +207,7 @@ public:
     }
 
     template<typename V>
-    void accept(V&& visitor)
+    void accept(V&& visitor) const
     {
         node->accept(Visitor{std::forward<V>(visitor), separator});
     }

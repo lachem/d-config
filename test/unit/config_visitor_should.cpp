@@ -36,9 +36,9 @@ struct ConfigVisitorShould : Test {};
 TEST_F(ConfigVisitorShould, beCalledWithAllKeyValues)
 {
     auto values = std::unordered_map<std::string, std::string>{};
-    config.accept([&values](std::string const& key, auto value_or_node) {
-        if constexpr (std::is_same_v<decltype(value_or_node), std::string>)
-            values.emplace(key, value_or_node);
+    config.accept([&values](std::string const& key, auto valueOrNode) {
+        if constexpr (std::is_same_v<decltype(valueOrNode), std::string>)
+            values.emplace(key, valueOrNode);
     });
     EXPECT_FALSE(values.empty());
 
@@ -52,9 +52,9 @@ TEST_F(ConfigVisitorShould, beCalledWithAllKeyValues)
 TEST_F(ConfigVisitorShould, beCalledWithNestedConfigs)
 {
     auto values = std::unordered_map<std::string, ::dconfig::Config>{};
-    config.accept([&values](std::string const& key, auto value_or_node) {
-        if constexpr (std::is_same_v<decltype(value_or_node), ::dconfig::Config>)
-            values.emplace(key, value_or_node);
+    config.accept([&values](std::string const& key, auto valueOrNode) {
+        if constexpr (std::is_same_v<decltype(valueOrNode), ::dconfig::Config>)
+            values.emplace(key, valueOrNode);
     });
     EXPECT_FALSE(values.empty());
 
@@ -65,9 +65,9 @@ TEST_F(ConfigVisitorShould, beCalledWithNestedConfigs)
 TEST_F(ConfigVisitorShould, beCalledForEachElementOfAnArray)
 {
     auto values = std::vector<std::pair<std::string, std::string>>{};
-    config.scope("array").accept([&values](std::string const& key, auto value_or_node) {
-        if constexpr (std::is_same_v<decltype(value_or_node), std::string>)
-            values.emplace_back(key, value_or_node);
+    config.scope("array").accept([&values](std::string const& key, auto valueOrNode) {
+        if constexpr (std::is_same_v<decltype(valueOrNode), std::string>)
+            values.emplace_back(key, valueOrNode);
     });
     EXPECT_EQ(values.size(), 4);
 
@@ -83,12 +83,12 @@ TEST_F(ConfigVisitorShould, beCalledForEachElementOfAnArray)
 TEST_F(ConfigVisitorShould, allowForRecursiveCall)
 {
     auto values = std::unordered_map<std::string, std::string>{};
-    config.accept([&values](std::string const& key, auto value_or_node) {
+    config.accept([&values](std::string const& key, auto valueOrNode) {
         if (key != "nested") return;
-        if constexpr (std::is_same_v<decltype(value_or_node), ::dconfig::Config>)
-            value_or_node.accept([&values](std::string const& key, auto value_or_node) {
-                if constexpr (std::is_same_v<decltype(value_or_node), std::string>) {
-                    values.emplace(key, value_or_node);
+        if constexpr (std::is_same_v<decltype(valueOrNode), ::dconfig::Config>)
+            valueOrNode.accept([&values](std::string const& key, auto valueOrNode) {
+                if constexpr (std::is_same_v<decltype(valueOrNode), std::string>) {
+                    values.emplace(key, valueOrNode);
                 }
             });
     });

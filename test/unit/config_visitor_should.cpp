@@ -8,7 +8,7 @@
 
 //config
 #include <config.hpp>
-#include <default_builder.hpp>
+#include <default_factory.hpp>
 
 //std
 #include <string>
@@ -19,7 +19,7 @@ using namespace testing;
 namespace test::dconfig {
 namespace {
 
-auto config = ::dconfig::DefaultBuilder().build({std::string{R"(
+auto config = ::dconfig::DefaultFactory().create({std::string{R"(
 {
     "key"    : "value",
     "key2"   : 1234567,

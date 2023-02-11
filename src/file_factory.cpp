@@ -5,7 +5,7 @@
 
 //local
 #include <file_factory.hpp>
-#include <default_builder.hpp>
+#include <default_factory.hpp>
 
 //std
 #include <fstream>
@@ -28,7 +28,7 @@ Config FileFactory::create() const
             contents.push_back(std::move(loaded));
         }
     }
-    return DefaultBuilder(separator).build(std::move(contents));
+    return DefaultFactory(separator).create(std::move(contents));
 }
 
 } //namespace dconfig

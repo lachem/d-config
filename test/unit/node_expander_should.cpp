@@ -8,7 +8,7 @@
 
 //config
 #include <config.hpp>
-#include <default_builder.hpp>
+#include <default_factory.hpp>
 
 //std
 #include <iostream>
@@ -146,7 +146,7 @@ struct NodeExpanderShould : public Test, public T
         setenv("RUNTIME", "/root", 1);
 
         config.reset(new ::dconfig::Config(
-            ::dconfig::DefaultBuilder().build(
+            ::dconfig::DefaultFactory().create(
                 { std::string(T::contents()) })));
     }
 

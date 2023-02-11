@@ -8,7 +8,7 @@
 
 //config
 #include <config.hpp>
-#include <default_builder.hpp>
+#include <default_factory.hpp>
 #include <init_factory.hpp>
 #include <file_factory.hpp>
 
@@ -67,7 +67,7 @@ struct TextConfigLoader
         files.push_back(loadFile(std::string("test/config_override.") + Extension::name));
         files.push_back(loadFile(std::string("test/array.") + Extension::name));
 
-        config.reset(new ::dconfig::Config(::dconfig::DefaultBuilder(separator).build(std::move(files))));
+        config.reset(new ::dconfig::Config(::dconfig::DefaultFactory(separator).create(std::move(files))));
     }
 
     std::string loadFile(const std::string& filename)

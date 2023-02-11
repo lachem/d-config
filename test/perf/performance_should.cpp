@@ -8,7 +8,7 @@
 
 //config
 #include <config.hpp>
-#include <default_builder.hpp>
+#include <default_factory.hpp>
 
 //std
 #include <fstream>
@@ -55,7 +55,7 @@ struct Performance : ::testing::Test
 
     ::dconfig::Config build(const ::dconfig::Separator& separator = ::dconfig::Separator())
     {
-        return ::dconfig::DefaultBuilder(separator).build(files);
+        return ::dconfig::DefaultFactory(separator).create(files);
     }
 
 private:

@@ -33,7 +33,7 @@ ConfigBuilder::node_type buildCustomTree(const boost::property_tree::ptree& sour
     std::queue<element_type> queue;
     std::queue<element_type> next;
 
-    auto result = std::make_shared<detail::ConfigNode>();
+    auto result = detail::ConfigNode::create();
     queue.push(std::make_pair(&source, result));
     while (!queue.empty())
     {
@@ -42,7 +42,7 @@ ConfigBuilder::node_type buildCustomTree(const boost::property_tree::ptree& sour
             if (auto&& key = node.first;
                 !node.second.empty())
             {
-                auto&& insert = std::make_shared<detail::ConfigNode>();
+                auto&& insert = detail::ConfigNode::create();
                 if (!key.empty() && key[0] != arrayKey.value)
                 {
                     queue.front().second->setNode(key, insert);

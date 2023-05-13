@@ -32,7 +32,7 @@
 namespace dconfig {
 namespace detail {
 
-class ConfigNode : public std::enable_shared_from_this<ConfigNode>
+class ConfigNode
 {
     struct sequenced {};
     struct ordered {};
@@ -127,11 +127,11 @@ public:
     template<typename T>
     void setNode(const std::string& key, T&& node, size_t index = std::numeric_limits<size_t>::max())
     {
-        node->parent = shared_from_this();
+        node->parent = this;
         if (auto&& it = nodes.get<ordered>().find(key);
             it == nodes.get<ordered>().end())
         {
-            nodes.get<sequenced>().push_back({key, node_list{std::forward<T>(node)}});
+            nodes.get<sequenced>().push_back({key, node_list{node}});
         }
         else
         {
@@ -245,7 +245,7 @@ public:
         return dummy<node_list>;
     }
 
-    [[nodiscard]] const node_type& getParent() const
+    [[nodiscard]] const ConfigNode* getParent() const
     {
         return parent;
     }
@@ -303,7 +303,7 @@ public:
             size_t index = 0;
             for (auto&& node : child.value)
             {
-                visitor.visit(shared_from_this(), child.key, index++, node);
+                visitor.visit(this, child.key, index++, node);
             }
         }
         for(auto&& child : values.get<sequenced>())
@@ -312,7 +312,7 @@ public:
             for (auto&& value : child.value)
             {
                 //NOTE: const_cast is safe here as we are not touching the key
-                visitor.visit(shared_from_this(), child.key, index++, const_cast<std::string&>(value));
+                visitor.visit(this, child.key, index++, const_cast<std::string&>(value));
             }
         }
     }
@@ -325,7 +325,7 @@ private:
         {
             stream  << "\n"    << indent << child.key
                     << " ("    << std::hex << this << ")"
-                    << " -> "  << std::hex << parent.get();
+                    << " -> "  << std::hex << parent;
             for (const auto& node : child.value)
             {
                 node->print(stream, indent + "    ");
@@ -338,7 +338,7 @@ private:
             {
                 stream << value << ",";
             }
-            stream  << "] -> " << std::hex << parent.get();
+            stream  << "] -> " << std::hex << parent;
         }
     }
 
@@ -349,7 +349,7 @@ private:
         {
             for (auto&& node : child.value)
             {
-                node->parent = shared_from_this();
+                node->parent = this;
                 if (recurse == Recurse::yes)
                     node->updateParents();
             }
@@ -363,7 +363,8 @@ private:
 
     children_container<node_list> nodes;
     children_container<value_list> values;
-    node_type parent;
+    // parent of shared_ptr type would introduce a circular dependency causing a mem leak
+    ConfigNode* parent = nullptr;
 };
 
 } //namespace detail

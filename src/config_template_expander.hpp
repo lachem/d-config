@@ -47,12 +47,12 @@ class ConfigTemplateExpander
             assert(result);
         }
 
-        void visit(detail::ConfigNode::node_type const& parent, const std::string& key, size_t, std::string&)
+        void visit(detail::ConfigNode* parent, const std::string& key, size_t, std::string&)
         {
             visit(parent, key);
         }
 
-        void visit(detail::ConfigNode::node_type const& parent, const std::string& key, size_t, detail::ConfigNode::node_type const& node)
+        void visit(detail::ConfigNode* parent, const std::string& key, size_t, const detail::ConfigNode::node_type& node)
         {
             if (!visit(parent, key)) // TODO: Add support for nested templates?
             {
@@ -61,7 +61,7 @@ class ConfigTemplateExpander
         }
 
     private:
-        bool visit(detail::ConfigNode::node_type const& parent, const std::string& key)
+        bool visit(detail::ConfigNode* parent, const std::string& key)
         {
             using namespace boost::xpressive;
 
@@ -71,12 +71,12 @@ class ConfigTemplateExpander
                 if (what.size() > 3)
                 {
                     auto&& path = what[3].str();
-                    auto scope = resolveScope(what, parent.get());
-                    if (scope && addKeyNode(scope, parent.get(), key, path))
+                    auto scope = resolveScope(what, parent);
+                    if (scope && addKeyNode(scope, parent, key, path))
                         return true;
 
                     //for backward compatiblity fallback to node scope
-                    if (scope == root && addKeyNode(parent.get(), parent.get(), key, path))
+                    if (scope == root && addKeyNode(parent, parent, key, path))
                         return true;
                 }
 
@@ -86,7 +86,7 @@ class ConfigTemplateExpander
             return false;
         }
 
-        detail::ConfigNode* resolveScope(const boost::xpressive::smatch& what, detail::ConfigNode* node) const
+        const detail::ConfigNode* resolveScope(const boost::xpressive::smatch& what, detail::ConfigNode* node) const
         {
             if (what.size() < 3)
                 return nullptr;
@@ -94,20 +94,20 @@ class ConfigTemplateExpander
             auto&& currentLevel = what[1].str();
             auto&& parentLevel = what[2].str();
 
-            auto scope = currentLevel.empty() && parentLevel.empty() ? root : node;
+            const auto* scope = currentLevel.empty() && parentLevel.empty() ? root : node;
             if (!parentLevel.empty())
             {
                 auto count = (parentLevel.size() / levelUp->size());
                 for (size_t i = 0; i < count && scope; ++i)
                 {
-                    scope = scope->getParent() ? scope->getParent().get() : nullptr;
+                    scope = scope->getParent();
                 }
             }
 
             return scope;
         }
 
-        bool addKeyNode(detail::ConfigNode* scope, detail::ConfigNode* parent, const std::string& key, const std::string& from)
+        bool addKeyNode(const detail::ConfigNode* scope, detail::ConfigNode* parent, const std::string& key, const std::string& from)
         {
             auto&& nodes = scope->getNodes(from.c_str(), separator);
             if (!nodes.empty())

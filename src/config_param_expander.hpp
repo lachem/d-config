@@ -81,7 +81,7 @@ class ConfigParamExpander
                 auto count = (parentLevel.size() / levelUp->size());
                 for (size_t i = 0; i < count && scope; ++i)
                 {
-                    scope = scope->getParent() ? scope->getParent().get() : nullptr;
+                    scope = scope->getParent();
                 }
             }
 
@@ -111,11 +111,11 @@ class ConfigParamExpander
             assert(levelUp);
         }
 
-        void visit(detail::ConfigNode::node_type const& parent, const std::string& key, size_t index, std::string& value)
+        void visit(const detail::ConfigNode* parent, const std::string& key, size_t index, std::string& value)
         {
             try
             {
-                value = boost::xpressive::regex_replace(value, *match, RegexExpander(root, parent.get(), separator, levelUp));
+                value = boost::xpressive::regex_replace(value, *match, RegexExpander(root, parent, separator, levelUp));
             }
             catch (const std::invalid_argument&)
             {
@@ -126,7 +126,7 @@ class ConfigParamExpander
             }
         }
 
-        void visit(detail::ConfigNode::node_type const&, const std::string&, size_t, detail::ConfigNode::node_type const& node)
+        void visit(const detail::ConfigNode*, const std::string&, size_t, detail::ConfigNode::node_type const& node)
         {
             node->accept(*this);
         }

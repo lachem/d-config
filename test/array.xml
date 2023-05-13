@@ -5,8 +5,4 @@
         <.>Elem2</.>
         <.>Elem3</.>
     </Array>
-    <InjectedArray>
-        <.>%node.ConfigShould%</.>
-        <.>%node.ConfigShould%</.>
-    </InjectedArray>
 </ConfigShould>

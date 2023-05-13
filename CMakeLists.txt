@@ -102,6 +102,12 @@ target_link_libraries(unit
     pthread
 )
 
+target_compile_options(unit PRIVATE
+    -fsanitize=address)
+
+target_link_options(unit PRIVATE
+    -fsanitize=address)
+
 add_executable(perf
     ${TESTF}
     ${PERFS}

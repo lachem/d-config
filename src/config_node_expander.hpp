@@ -52,7 +52,7 @@ class ConfigNodeExpander
             assert(result);
         }
 
-        void visit(detail::ConfigNode::node_type const& parent, const std::string& key, size_t index, std::string& value)
+        void visit(detail::ConfigNode* parent, const std::string& key, size_t index, std::string& value)
         {
             using namespace boost::xpressive;
 
@@ -62,12 +62,12 @@ class ConfigNodeExpander
                 if (what.size() > 3)
                 {
                     auto&& path = what[3].str();
-                    auto scope = resolveScope(what, parent.get());
-                    if (scope && addKeyNode(scope, parent.get(), key, index, path))
+                    auto scope = resolveScope(what, parent);
+                    if (scope && addKeyNode(scope, parent, key, index, path))
                         return;
 
                     //for backward compatiblity fallback to node scope
-                    if (scope == root && addKeyNode(parent.get(), parent.get(), key, index, path))
+                    if (scope == root && addKeyNode(parent, parent, key, index, path))
                         return;
                 }
 
@@ -78,13 +78,13 @@ class ConfigNodeExpander
             }
         }
 
-        void visit(detail::ConfigNode::node_type const&, const std::string&, size_t, detail::ConfigNode::node_type const& node)
+        void visit(detail::ConfigNode*, const std::string&, size_t, detail::ConfigNode::node_type const& node)
         {
             node->accept(*this);
         }
 
     private:
-        detail::ConfigNode* resolveScope(const boost::xpressive::smatch& what, detail::ConfigNode* node) const
+        const detail::ConfigNode* resolveScope(const boost::xpressive::smatch& what, detail::ConfigNode* node) const
         {
             if (what.size() < 3)
                 return nullptr;
@@ -92,20 +92,20 @@ class ConfigNodeExpander
             auto&& currentLevel = what[1].str();
             auto&& parentLevel = what[2].str();
 
-            auto scope = currentLevel.empty() && parentLevel.empty() ? root : node;
+            const auto* scope = currentLevel.empty() && parentLevel.empty() ? root : node;
             if (!parentLevel.empty())
             {
                 auto count = (parentLevel.size() / levelUp->size());
                 for (size_t i = 0; i < count && scope; ++i)
                 {
-                    scope = scope->getParent() ? scope->getParent().get() : nullptr;
+                    scope = scope->getParent();
                 }
             }
 
             return scope;
         }
 
-        bool addKeyNode(detail::ConfigNode* scope, detail::ConfigNode* parent, const std::string& key, size_t index, const std::string& from)
+        bool addKeyNode(const detail::ConfigNode* scope, detail::ConfigNode* parent, const std::string& key, size_t index, const std::string& from)
         {
             auto&& nodes = scope->getNodes(from.c_str(), separator);
             if (!nodes.empty())
@@ -145,7 +145,7 @@ class ConfigNodeExpander
         }
 
         //TODO: consider moving this to ConfigNode
-        KeyNode getBaseNode(detail::ConfigNode* scope, const std::string& key) const
+        KeyNode getBaseNode(const detail::ConfigNode* scope, const std::string& key) const
         {
             auto&& values = scope->getValues(key.c_str(), separator);
             if (!values.empty())

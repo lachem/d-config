@@ -5,12 +5,12 @@ mkdir -p lib
 
 if   [ "$1" = "release" ]; then
     echo "Configuring for release"
-    cmake . -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release
+    cmake . -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=1
 elif [ "$1" = "debug"   ]; then
     echo "Configuring for debug"
-    cmake . -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug
+    cmake . -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=1
 else
     echo "No build type specified, configuring for debug"
-    cmake . -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug
+    cmake . -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=1
 fi
 

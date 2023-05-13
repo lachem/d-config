@@ -7,10 +7,5 @@
             "Elem2",
             "Elem3"
         ]
-    },
-    "InjectedArray" :
-    [
-        "%node.ConfigShould%",
-        "%node.ConfigShould%"
-    ]
+    }
 }

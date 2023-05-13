@@ -33,12 +33,12 @@ class Config
             , visitor{std::forward<V>(visitor)}
         {}
 
-        void visit(detail::ConfigNode::node_type const&, const std::string& key, size_t, std::string& value)
+        void visit(const detail::ConfigNode*, const std::string& key, size_t, std::string& value)
         {
             visitor(key.empty() ? arrayKey : key, static_cast<std::string const&>(value));
         }
 
-        void visit(detail::ConfigNode::node_type const&, const std::string& key, size_t, detail::ConfigNode::node_type const& node)
+        void visit(const detail::ConfigNode*, const std::string& key, size_t, detail::ConfigNode::node_type const& node)
         {
             visitor(key, Config{node, separator});
         }

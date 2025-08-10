@@ -72,13 +72,20 @@ public:
         {
             if (auto&& value = get<std::string>(path))
             {
-                try
+                if constexpr (std::is_constructible_v<T, std::string>)
                 {
-                    return boost::lexical_cast<T>(*value);
+                    return T{ std::move(*value) };
                 }
-                catch(boost::bad_lexical_cast& ex)
+                else
                 {
-                    throw std::invalid_argument(conversionError<T>(*value, std::string(path)));
+                    try
+                    {
+                        return boost::lexical_cast<T>(*value);
+                    }
+                    catch(boost::bad_lexical_cast& ex)
+                    {
+                        throw std::invalid_argument(conversionError<T>(*value, std::string(path)));
+                    }
                 }
             }
         }

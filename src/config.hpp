@@ -231,6 +231,13 @@ public:
         return static_cast<bool>(node);
     }
 
+    [[nodiscard]] bool exists(const std::string& path) const
+    {
+        return this->exists(path.c_str());
+    }
+
+    [[nodiscard]] bool exists(const char* path) const;
+
 private:
     friend class ConfigBuilder;
 
@@ -292,6 +299,12 @@ inline std::vector<std::string> Config::getAll<std::string>(const char* path) co
     return (node)
         ? node->getValues(path, separator)
         : dummy;
+}
+
+[[nodiscard]] inline bool Config::exists(const char* path) const
+{
+    return static_cast<bool>(get<std::string>(path)) ||
+           static_cast<bool>(scope(path));
 }
 
 } //namespace dconfig
